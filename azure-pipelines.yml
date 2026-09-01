@@ -1,0 +1,51 @@
+# BookMyHome - CI pipeline
+# Læg denne fil i roden af dit repo (ved siden af BookMyHome.sln).
+# Commit den FØRST når solution og mindst ét testprojekt findes (efter Opgave 3),
+# ellers fejler den bare rødt hver gang.
+
+trigger:
+  branches:
+    include:
+      - main
+      - feature/*
+
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+  - task: UseDotNet@2
+    displayName: 'Installer .NET 10 SDK'
+    inputs:
+      packageType: 'sdk'
+      version: '10.0.x'
+
+  - script: dotnet restore
+    displayName: 'Restore NuGet-pakker'
+
+  - script: dotnet build --configuration $(buildConfiguration) --no-restore
+    displayName: 'Build'
+
+  - script: >
+      dotnet test
+      --configuration $(buildConfiguration)
+      --no-build
+      --logger trx
+      --results-directory $(Agent.TempDirectory)
+    displayName: 'Kør unit tests'
+
+  - task: PublishTestResults@2
+    displayName: 'Publicér testresultater'
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFormat: 'VSTest'
+      testResultsFiles: '**/*.trx'
+      searchFolder: '$(Agent.TempDirectory)'
+      failTaskOnFailedTests: true
