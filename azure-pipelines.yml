@@ -1,7 +1,6 @@
 # BookMyHome - CI pipeline
-# Læg denne fil i roden af dit repo (ved siden af BookMyHome.sln).
-# Commit den FØRST når solution og mindst ét testprojekt findes (efter Opgave 3),
-# ellers fejler den bare rødt hver gang.
+# Kommer til at fejle hver gang, så længe der ikke er noget kode heri.
+# Added it because I wanted to, sue me
 
 trigger:
   branches:
