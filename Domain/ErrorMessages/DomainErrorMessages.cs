@@ -2,10 +2,14 @@
 {
     public static class DomainErrorMessages
     {
-        public const string OverlappingBooking =
-            "Start time of the booking overlaps with an already existing booking";
+        public static string OverlappingBooking(Guid bookingId) =>
+            $"Start time of the booking: {bookingId} overlaps with an already existing booking";
 
-        public const string EndTimeMustBeLaterThanStartTime =
+        public static string EndTimeMustBeLaterThanStartTime =
             "End must be later than the start time";
+
+
+        public static string StartTimeMustBeInTheFuture =
+           "Start must be in the future";
     }
 }

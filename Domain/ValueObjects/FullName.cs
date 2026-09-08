@@ -5,7 +5,7 @@
         public string FirstName { get; }
         public string LastName { get; }
 
-        public FullName() { }
+        private FullName() { }
 
         public FullName(string firstName, string lastName)
         {
