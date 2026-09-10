@@ -1,4 +1,8 @@
-﻿using Domain.ValueObjects;
+﻿using Domain.Aggregates.Accommodations;
+using Domain.Errors;
+using Domain.Exceptions;
+using Domain.ValueObjects;
+using System.Diagnostics;
 
 namespace Tests
 {
@@ -50,6 +54,19 @@ namespace Tests
             var testDateRange = new DateRange(new DateOnly(2026, 6, start), new DateOnly(2026, 6, end));
 
             Assert.Equal(expected, testDateRange.Contains(testDate));
+        }
+
+        [Fact]
+        public void Constructor_StartDateBeforeToday_Throws()
+        {
+            // Arrange
+            var today = new DateOnly(2026, 9, 10);
+            var period = new DateRange(new DateOnly(2026, 9, 9), new DateOnly(2026, 9, 12));
+
+            // Act & Assert
+            var exception = Assert.Throws<Exceptions.StartTimeMustBeInTheFuture>(() =>
+                new Booking(Guid.NewGuid(), Guid.NewGuid(), period, 100m, today));
+            Assert.Equal("StartTimeMustBeInTheFuture", exception.Message);
         }
     }
 }

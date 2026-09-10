@@ -18,7 +18,7 @@ namespace Domain.Aggregates.Accommodations
         public decimal PricePerDayWhenBooked { get; private set; } // To store the historical data
 
         private Booking() { }
-        public Booking(Guid id, Guid guestId, DateRange rentalPeriod, decimal pricePerDay)
+        public Booking(Guid id, Guid guestId, DateRange rentalPeriod, decimal pricePerDay, DateOnly today)
         {
             if (id == Guid.Empty)
                 throw new ArgumentException(nameof(id));
@@ -29,7 +29,7 @@ namespace Domain.Aggregates.Accommodations
             if (rentalPeriod is null)
                 throw new ArgumentException(nameof(rentalPeriod));
 
-            if (rentalPeriod.StartDate < DateOnly.FromDateTime(DateTime.Today))
+            if (rentalPeriod.StartDate < today)
                 throw new ArgumentException(DomainErrorMessages.StartTimeMustBeInTheFuture, nameof(rentalPeriod.StartDate));
 
             if (pricePerDay <= 0) 
