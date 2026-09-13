@@ -1,8 +1,6 @@
 ﻿using Domain.Aggregates.Accommodations;
-using Domain.Errors;
 using Domain.Exceptions;
 using Domain.ValueObjects;
-using System.Diagnostics;
 
 namespace Tests
 {
@@ -24,10 +22,11 @@ namespace Tests
         [Theory]
         [InlineData(1, 5, 10, 15, false)] // Before
         [InlineData(10, 15, 1, 5, false)] // After
-        [InlineData(1, 10, 10, 15, true)] // touches 
+        [InlineData(1, 10, 10, 15, true)] // touches on the left
+        [InlineData(15, 20, 10, 15, true)] // touches on the right
         [InlineData(1, 20, 5, 10, true)] // inside
         [InlineData(1, 10, 1, 10, true)] // identical
-        public void OverlapsWith_ReturnsExpected(int aStart, int aEnd,  int bStart, int bEnd, bool expected)
+        public void OverlapsWith_ReturnsExpected(int aStart, int aEnd, int bStart, int bEnd, bool expected)
         {
             var a = new DateRange(new DateOnly(2026, 6, aStart), new DateOnly(2026, 6, aEnd));
             var b = new DateRange(new DateOnly(2026, 6, bStart), new DateOnly(2026, 6, bEnd));
@@ -36,9 +35,9 @@ namespace Tests
         }
 
         [Fact]
-        public void Ctor_EndBeforeStart_Throws()
+        public void Ctor_EndDateIsBeforeStartDate_Throws()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.Throws<EndDateIsBeforeStartDateException>(() =>
                 new DateRange(new DateOnly(2026, 6, 10), new DateOnly(2026, 6, 1)));
         }
 
@@ -64,9 +63,52 @@ namespace Tests
             var period = new DateRange(new DateOnly(2026, 9, 9), new DateOnly(2026, 9, 12));
 
             // Act & Assert
-            var exception = Assert.Throws<Exceptions.StartTimeMustBeInTheFuture>(() =>
-                new Booking(Guid.NewGuid(), Guid.NewGuid(), period, 100m, today));
-            Assert.Equal("StartTimeMustBeInTheFuture", exception.Message);
+            var exception = Assert.Throws<BookingStartDateCannotBeInThePastException>(() =>
+                new Booking(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), period, 100m, today));
+        }
+
+        [Fact]
+        public void Constructor_StartDayIsToday_CreatesBookingSuccessfully()
+        {
+            // Arrange
+            var today = new DateOnly(2026, 9, 10);
+            var period = new DateRange(new DateOnly(2026, 9, 10), new DateOnly(2026, 9, 12));
+
+            // Act and Assert
+            var booking = new Booking(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), period, 100m, today);
+        }
+
+        [Fact]
+        public void DateRangeConstructor_StartEqualsEnd_Throws()
+        {
+            // Arractsert..?
+            Assert.Throws<BookingStartAndEndDateCannotBeEqualException>(() =>
+                new DateRange(new DateOnly(2026, 9, 10), new DateOnly(2026, 9, 10)));
+        }
+
+        private static Accommodation CreateAccommodation(decimal pricePerDay = 100m) =>
+            new Accommodation(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                new Address("TestStreet", "43", "Testcity", "1919", "Jugoslavia"), 
+                new DateRange(new DateOnly(2026, 9, 10), new DateOnly(2026, 9, 15)), 
+                pricePerDay);
+
+        [Fact]
+        public void AddBooking_NoExistingBookings_AddsBooking()
+        {
+            // Arrange
+            var accommodation = CreateAccommodation();
+            var today = new DateOnly(2026, 9, 10);
+            var period = new DateRange(new DateOnly(2026, 10, 20), new DateOnly(2026, 10, 25));
+
+            // Act
+            var booking = accommodation.AddBooking(Guid.NewGuid(), period, today);
+
+            // Assert
+            Assert.Single(accommodation.Bookings);
+            Assert.Equal(accommodation.Id, booking.AccommodationId);
+            Assert.Equal(600m, booking.TotalPrice); // 100m = price per day from the helper method above, 20-25th is 6 days with business rules
         }
     }
 }

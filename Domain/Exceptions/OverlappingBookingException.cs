@@ -1,11 +1,9 @@
-﻿using Domain.Errors;
-
-namespace Domain.Exceptions
+﻿namespace Domain.Exceptions
 {
     public class OverlappingBookingException : DomainException
     {
         public OverlappingBookingException(Guid bookingId)
-            : base(DomainErrorMessages.OverlappingBooking(bookingId))
+            : base($"Start time of the booking: {bookingId} overlaps with an already existing booking")
         { }
     }
 }

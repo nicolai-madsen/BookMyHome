@@ -1,4 +1,4 @@
-﻿using Domain.Errors;
+﻿using Domain.Exceptions;
 
 namespace Domain.ValueObjects
 {
@@ -10,8 +10,11 @@ namespace Domain.ValueObjects
         private DateRange() { } // Empty and PRIVATE ctor for EF Core
         public DateRange(DateOnly start, DateOnly end)
         {
-            if (start >= end)
-                throw new ArgumentException(DomainErrorMessages.EndTimeMustBeLaterThanStartTime, nameof(start));
+            if (start > end)
+                throw new EndDateIsBeforeStartDateException();
+
+            if (start == end)
+                throw new BookingStartAndEndDateCannotBeEqualException();
 
             StartDate = start;
             EndDate = end;

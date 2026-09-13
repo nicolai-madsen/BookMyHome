@@ -1,6 +1,5 @@
 ﻿using Domain.ValueObjects;
 using Domain.Enums;
-using Domain.Errors;
 using Domain.Exceptions;
 
 namespace Domain.Aggregates.Accommodations
@@ -9,7 +8,7 @@ namespace Domain.Aggregates.Accommodations
     {
         public Guid Id { get; private set; }
         public Guid GuestId { get; private set; }
-        public Accommodation Accommodation { get; private set; }
+        public Guid AccommodationId { get; private set; }
         public DateRange RentalPeriod { get; private set; } // RentalPeriod dato er "til -og med", så to bookinger på samme dag KAN IKKE ske, selvom gæsten fiser af tidligt. Det kunne give noget lost revenue...
         public decimal TotalPrice { get; private set; }
         public DateTimeOffset CreatedAt { get; private set; } // People from all over the world book accommodations, thats why DateTimeOffset type
@@ -18,22 +17,22 @@ namespace Domain.Aggregates.Accommodations
         public decimal PricePerDayWhenBooked { get; private set; } // To store the historical data
 
         private Booking() { }
-        public Booking(Guid id, Guid guestId, DateRange rentalPeriod, decimal pricePerDay, DateOnly today)
+        public Booking(Guid id, Guid guestId, Guid accommodationId, DateRange rentalPeriod, decimal pricePerDay, DateOnly today)
         {
             if (id == Guid.Empty)
-                throw new ArgumentException(nameof(id));
+                throw new ArgumentException("Id cannot be empty", nameof(id));
 
             if (guestId == Guid.Empty)
-                throw new ArgumentException(nameof(guestId));
+                throw new ArgumentException("Guest Id cannot be empty", nameof(guestId));
+
+            if (accommodationId == Guid.Empty)
+                throw new ArgumentException("Accommodation Id cannot be empty", nameof(accommodationId));
 
             if (rentalPeriod is null)
-                throw new ArgumentException(nameof(rentalPeriod));
+                ArgumentNullException.ThrowIfNull(rentalPeriod);
 
-            if (rentalPeriod.StartDate < today)
-                throw new ArgumentException(DomainErrorMessages.StartTimeMustBeInTheFuture, nameof(rentalPeriod.StartDate));
-
-            if (pricePerDay <= 0) 
-                throw new InvalidOperationException("Price per day cannot be less than -or equal to 0");
+            if (rentalPeriod.StartDate < today) 
+                throw new BookingStartDateCannotBeInThePastException();
                 
 
             Id = id;
@@ -47,7 +46,7 @@ namespace Domain.Aggregates.Accommodations
 
         public void Reschedule(DateRange dateRange)
         {
-            
+            throw new NotImplementedException();
         }
 
         public void CancelByGuest() 

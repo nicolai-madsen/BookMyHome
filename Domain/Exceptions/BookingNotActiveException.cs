@@ -1,11 +1,9 @@
-﻿using Domain.Errors;
-
-namespace Domain.Exceptions
+﻿namespace Domain.Exceptions
 {
     public class BookingNotActiveException : DomainException
     {
         public BookingNotActiveException(Guid bookingId)
-            : base(DomainErrorMessages.OverlappingBooking(bookingId))
+            : base("Booking isn't active and can't be cancelled")
         { }
     }
 }
