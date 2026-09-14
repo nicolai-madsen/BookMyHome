@@ -37,6 +37,7 @@ namespace Domain.Aggregates.Accommodations
 
             Id = id;
             GuestId = guestId;
+            AccommodationId = accommodationId;
             RentalPeriod = rentalPeriod;
             PricePerDayWhenBooked = pricePerDay;
             TotalPrice = pricePerDay * rentalPeriod.TotalDays;
@@ -46,7 +47,7 @@ namespace Domain.Aggregates.Accommodations
 
         public void Reschedule(DateRange dateRange)
         {
-            throw new NotImplementedException();
+                
         }
 
         public void CancelByGuest() 

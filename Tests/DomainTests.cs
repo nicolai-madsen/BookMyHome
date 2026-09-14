@@ -91,7 +91,7 @@ namespace Tests
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 new Address("TestStreet", "43", "Testcity", "1919", "Jugoslavia"), 
-                new DateRange(new DateOnly(2026, 9, 10), new DateOnly(2026, 9, 15)), 
+                new DateRange(new DateOnly(2026, 1, 1), new DateOnly(2026, 12, 31)), 
                 pricePerDay);
 
         [Fact]
@@ -109,6 +109,58 @@ namespace Tests
             Assert.Single(accommodation.Bookings);
             Assert.Equal(accommodation.Id, booking.AccommodationId);
             Assert.Equal(600m, booking.TotalPrice); // 100m = price per day from the helper method above, 20-25th is 6 days with business rules
+        }
+
+        [Fact]
+        public void AddBooking_NotOverlappingBooking_AddsBooking()
+        {
+            // Arrange
+            var accommodation = CreateAccommodation();
+            var today = new DateOnly(2026, 9, 10);
+            var firstPeriod = new DateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 5));
+            var secondPeriod = new DateRange(new DateOnly(2026, 10, 20), new DateOnly(2026, 10, 25));
+            accommodation.AddBooking(Guid.NewGuid(), firstPeriod, today);
+            accommodation.AddBooking(Guid.NewGuid(), secondPeriod, today);
+
+            // Act
+            var newPeriod = new DateRange(new DateOnly(2026, 10, 10), new DateOnly(2026, 10, 16));
+            var newBooking = accommodation.AddBooking(Guid.NewGuid(), newPeriod, today);
+
+            // Assert
+            Assert.Equal(3, accommodation.Bookings.Count);
+            Assert.Equal(700m, newBooking.TotalPrice);
+        }
+
+        [Fact]
+        public void AddBooking_OverlappingBooking_Throws()
+        {
+            // Arrange
+            var accommodation = CreateAccommodation();
+            var today = new DateOnly(2026, 9, 10);
+            var firstPeriod = new DateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 5));
+            accommodation.AddBooking(Guid.NewGuid(), firstPeriod, today);
+            // Act & Assert
+            var overlappingPeriod = new DateRange(new DateOnly(2026, 10, 4), new DateOnly(2026, 10, 10));
+            Assert.Throws<OverlappingBookingException>(() =>
+                accommodation.AddBooking(Guid.NewGuid(), overlappingPeriod, today));
+            Assert.Single(accommodation.Bookings);
+        }
+
+        [Fact]
+        public void AddBooking_OverlappingWithCancelledBooking_AddsBooking()
+        {
+            // Arrange
+            var accommodation = CreateAccommodation();
+            var today = new DateOnly(2026, 9, 10);
+            var firstPeriod = new DateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 5));
+            var firstBooking = accommodation.AddBooking(Guid.NewGuid(), firstPeriod, today);
+            firstBooking.CancelByGuest();
+            // Act
+            var overlappingPeriod = new DateRange(new DateOnly(2026, 10, 4), new DateOnly(2026, 10, 10));
+            var newBooking = accommodation.AddBooking(Guid.NewGuid(), overlappingPeriod, today);
+            // Assert
+            Assert.Equal(2, accommodation.Bookings.Count); // The cancelled booking is still in the list of bookings
+            Assert.Equal(accommodation.Id, newBooking.AccommodationId); // The new booking is added successfully
         }
     }
 }
