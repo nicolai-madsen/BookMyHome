@@ -33,8 +33,7 @@ namespace Domain.Aggregates.Accommodations
 
             if (rentalPeriod.StartDate < today) 
                 throw new BookingStartDateCannotBeInThePastException();
-                
-
+               
             Id = id;
             GuestId = guestId;
             AccommodationId = accommodationId;

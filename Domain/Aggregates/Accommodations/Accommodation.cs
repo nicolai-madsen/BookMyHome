@@ -16,15 +16,17 @@ namespace Domain.Aggregates.Accommodations
 
         private Accommodation() { }
 
-        public Accommodation(Guid hostId, Guid bookingId, Address address, DateRange availablePeriod, decimal pricePerDay)
+        public Accommodation(Guid id, Guid hostId, Address address, DateRange availablePeriod, decimal pricePerDay)
         {
+            if (id == Guid.Empty) throw new ArgumentException("Id cannot be empty;", nameof(id));
+
             if (hostId == Guid.Empty) throw new ArgumentException("Host Id cannot be empty;", nameof(hostId));
 
             ArgumentNullException.ThrowIfNull(address);
 
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pricePerDay);
 
-            Id = Guid.NewGuid();
+            Id = id;
             HostId = hostId;
             Address = address;
             AvailablePeriod = availablePeriod;
