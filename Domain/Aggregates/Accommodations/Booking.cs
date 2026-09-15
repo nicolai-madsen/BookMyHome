@@ -45,9 +45,18 @@ namespace Domain.Aggregates.Accommodations
             Status = BookingStatus.Active;
         }
 
-        public void Reschedule(DateRange dateRange)
+        public void Reschedule(DateRange newPeriod, DateOnly today)
         {
-                
+            ArgumentNullException.ThrowIfNull(newPeriod);
+
+            if (Status != BookingStatus.Active)
+                throw new BookingNotActiveException(Id);
+
+            if (newPeriod.StartDate < today)
+                throw new BookingStartDateCannotBeInThePastException();
+
+            RentalPeriod = newPeriod;
+            TotalPrice = PricePerDayWhenBooked * RentalPeriod.TotalDays;
         }
 
         public void CancelByGuest() 

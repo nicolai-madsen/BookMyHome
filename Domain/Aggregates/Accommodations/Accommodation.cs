@@ -46,16 +46,29 @@ namespace Domain.Aggregates.Accommodations
 
         public void RescheduleBooking(Guid bookingId, DateRange newPeriod, DateOnly today)
         {
+            Booking? target = null;
 
-            foreach (var booking in _bookings)
+            foreach (var existing in _bookings)
             {
-                if (booking.Id == bookingId)
+                if (existing.Id == bookingId)
                 {
-                    if (booking.Status == BookingStatus.Active && booking.RentalPeriod.OverlapsWith(newPeriod))
-                    {
-                        throw new OverlappingBookingException(booking.Id);
-                    }
+                    target = existing;
+                    break;
                 }
             }
+
+            if (target is null)
+            {
+                throw new BookingNotFoundException(bookingId);
+            }
+
+            foreach (var existing in _bookings)
+            {
+                if (existing.Id != bookingId && existing.Status == BookingStatus.Active && existing.RentalPeriod.OverlapsWith(newPeriod))
+                    throw new OverlappingBookingException(existing.Id);
+            }
+
+            target.Reschedule(newPeriod, today);
         }
     }
+}
