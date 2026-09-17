@@ -1,4 +1,4 @@
-﻿namespace Shared
+﻿namespace Shared.DomainDtos
 {
     public record BookingDto(
         Guid Id,
