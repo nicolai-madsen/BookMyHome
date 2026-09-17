@@ -2,5 +2,6 @@
   <Project Path="Application/Application.csproj" Id="fa22785e-a381-467f-98e9-a3c7e1822e85" />
   <Project Path="Domain/Domain.csproj" Id="e58c28a7-848c-4007-9f98-bc7ebf97b69e" />
   <Project Path="Persistence/Persistence.csproj" Id="6193d6a5-0029-4401-a4b0-8e0746ad8b0a" />
+  <Project Path="Shared/Shared.csproj" Id="8fb09f46-e81a-4ade-9bf8-78a2736f94be" />
   <Project Path="Tests/Tests.csproj" Id="205771f7-6947-46a4-9f7f-c091c1d05d1f" />
 </Solution>
