@@ -1,4 +1,5 @@
-﻿using Domain.ValueObjects;
+﻿using Domain.Exceptions;
+using Domain.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
 using Persistence.Repositories;
 using Shared.DomainDtos;
@@ -39,14 +40,32 @@ namespace Application.Controllers
         }
 
         [HttpPost("{accommodationId:guid}/bookings")]
+        [ProducesResponseType<BookingDto>(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BookingDto>> CreateBooking(Guid accommodationId, CreateBookingRequest request) 
         {
             var accommodation = await _repository.GetByIdAsync(accommodationId);
             if (accommodation == null)
                 return NotFound($"No accommodation exists with id: {accommodationId}.");
 
-            var period = new DateRange(request.StartDate, request.EndDate);
-            accommodation.AddBooking(request.GuestId, period, );
+            try
+            {
+                var period = new DateRange(request.StartDate, request.EndDate);
+
+                // TODO: "today" skal komme fra en injiceret TimeProvider og bruge boligens
+                // tidszone, ikke serverens lokale tid. Se domænets today-parameter.
+                var booking = accommodation.AddBooking(request.GuestId, period, DateOnly.FromDateTime(DateTime.Today));
+
+                await _repository.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetById), new { accommodationId, bookingId = booking.Id });
+            }
+            catch(OverlappingBookingException ex)
+            {
+                return Conflict(ex.Message); // 409 Conflict
+            }
         }
     }
 }
