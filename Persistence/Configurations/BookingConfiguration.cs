@@ -11,6 +11,9 @@ namespace Persistence.Configurations
         {
             builder.HasKey(b => b.Id);
 
+            builder.Property(b => b.Id).ValueGeneratedNever();
+               
+
             builder.OwnsOne(b => b.RentalPeriod, p =>
             {
                 p.Property(x => x.StartDate).HasColumnName("BookingStartDate");

@@ -9,6 +9,16 @@ namespace Persistence.Configurations
         public void Configure(EntityTypeBuilder<Accommodation> builder)
         {
             builder.HasKey(a => a.Id);
+            builder.Property(b => b.Id).ValueGeneratedNever();
+
+            builder.HasMany(a => a.Bookings)
+                .WithOne()
+                .HasForeignKey("AccommodationId")
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Metadata
+                .FindNavigation(nameof(Accommodation.Bookings))!
+                .SetPropertyAccessMode(PropertyAccessMode.Field);
 
             builder.OwnsOne(a => a.Address, p =>
             {

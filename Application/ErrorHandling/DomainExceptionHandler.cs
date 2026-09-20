@@ -1,0 +1,40 @@
+﻿using Domain.Exceptions;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Application.ErrorHandling
+{
+    /// <summary>
+    /// This class solves an issue where failed object initializations can throw incorrect/unprecise exceptions.
+    /// 
+    /// </summary>
+    public sealed class DomainExceptionHandler : IExceptionHandler
+    {
+        public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
+        {
+            var (status, title) = exception switch
+            {
+                OverlappingBookingException => (StatusCodes.Status409Conflict, "Booking conflict"),
+
+                ArgumentException => (StatusCodes.Status400BadRequest, "Invalid request"),
+
+                _ => (0, "")
+            };
+
+            if (status == 0) // Unknown exceptions becomes 500 
+                return false;
+
+            var problem = new ProblemDetails
+            {
+                Status = status,
+                Title = title,
+                Detail = exception.Message,
+                Instance = context.Request.Path
+            };
+
+            context.Response.StatusCode = status;
+            await context.Response.WriteAsJsonAsync(problem, cancellationToken);
+            return true;
+        }
+    }
+}

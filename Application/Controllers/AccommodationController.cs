@@ -1,9 +1,11 @@
-﻿using Domain.Exceptions;
+﻿using Microsoft.AspNetCore.Mvc;
+using Domain;
+using Domain.Exceptions;
+using Domain.Repositories;
 using Domain.ValueObjects;
-using Microsoft.AspNetCore.Mvc;
-using Persistence.Repositories;
 using Shared.DomainDtos;
 using Shared.UseCaseDtos;
+using Application.Mapping;
 
 namespace Application.Controllers
 {
@@ -12,14 +14,16 @@ namespace Application.Controllers
     public class AccommodationController : ControllerBase
     {
         private readonly IAccommodationRepository _repository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public AccommodationController(IAccommodationRepository repository)
+        public AccommodationController(IAccommodationRepository repository, IUnitOfWork unitOfWork)
         {
             _repository = repository;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AccommodationDto>>> GetaAll()
+        public async Task<ActionResult<IEnumerable<AccommodationDto>>> GetAll()
         {
             var accommodations = await _repository.GetAllAsync();
             var dtos = accommodations.Select(a => new AccommodationDto(a.Id, a.PricePerDay));
@@ -37,6 +41,30 @@ namespace Application.Controllers
 
             var dto = new AccommodationDto(accommodation.Id, accommodation.PricePerDay);
             return Ok(dto);
+        }
+
+        [HttpGet("{accommodationId:guid}/bookings/{bookingId:guid}", Name = "GetBooking")]
+        public async Task<ActionResult<BookingDto>> GetBooking(Guid accommodationId, Guid bookingId)
+        {
+            var accommodation = await _repository.GetByIdAsync(accommodationId);
+
+            if (accommodation == null)
+                return NotFound($"No accommodation exists with id: {accommodationId}.");
+
+            var booking = accommodation.Bookings.FirstOrDefault(b => b.Id == bookingId);
+
+            if (booking is null)
+                return NotFound($"No booking exists with Id: {bookingId}.");
+            return booking.ToDto();
+
+        }
+
+        [HttpGet("{accommodationId:guid}/bookings")]
+        [ProducesResponseType<IEnumerable<BookingDto>>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<BookingDto>>> GetAllBookings(Guid accommodationId)
+        {
+
         }
 
         [HttpPost("{accommodationId:guid}/bookings")]
@@ -58,9 +86,9 @@ namespace Application.Controllers
                 // tidszone, ikke serverens lokale tid. Se domænets today-parameter.
                 var booking = accommodation.AddBooking(request.GuestId, period, DateOnly.FromDateTime(DateTime.Today));
 
-                await _repository.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetById), new { accommodationId, bookingId = booking.Id });
+                return CreatedAtAction(nameof(GetBooking), new { accommodationId, bookingId = booking.Id }, booking.ToDto());
             }
             catch(OverlappingBookingException ex)
             {

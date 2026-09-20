@@ -23,7 +23,7 @@ namespace Persistence
         {
             if (_context.Accommodations.Any()) return;
 
-            var today = new DateOnly(2026, 9, 10);
+            var today = new DateOnly(2026, 1, 1);
 
             var accommodation1 = new Accommodation(
                 Guid.NewGuid(),
@@ -34,7 +34,7 @@ namespace Persistence
 
             accommodation1.AddBooking(
                 Guid.NewGuid(),
-                new DateRange(new DateOnly(2026, 1, 1), new DateOnly(2026, 1, 1)),
+                new DateRange(new DateOnly(2026, 9, 11), new DateOnly(2026, 9, 16)),
                 today);
 
             accommodation1.AddBooking(

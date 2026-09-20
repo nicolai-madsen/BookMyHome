@@ -1,4 +1,5 @@
 ﻿using Domain.Aggregates.Accommodations;
+using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.Repositories
@@ -26,15 +27,9 @@ namespace Persistence.Repositories
                 .ToListAsync();
         }
 
-        public Task Add(Accommodation accommodation)
+        public void Add(Accommodation accommodation)
         {
             _context.Accommodations.Add(accommodation);
-            return Task.CompletedTask;
-        }
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
         }
     }
 }
