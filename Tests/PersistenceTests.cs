@@ -2,6 +2,7 @@
 using Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
+using Persistence.Repositories;
 
 namespace Tests
 {
@@ -15,63 +16,53 @@ namespace Tests
             return new BookMyHomeContext(options);
         }
 
-        [Fact]
-        public async Task GetAccommodation_WithoutInclude_BookingsAreEmpty()
-        {
-            // Arrange
-            var dbName = "BookMyHome_WithoutInclude";
-            var accommodationId = Guid.NewGuid();
-
-            using (var context = CreateContext(dbName))
-            {
-                await context.Database.EnsureDeletedAsync();   // clean up
-                await context.Database.EnsureCreatedAsync();
-
-                var accommodation = new Accommodation(accommodationId, Guid.NewGuid(), new Address("Vej1", "2", "By1", "1111", "Country1"),  new DateRange(new DateOnly(2026, 1, 1), new DateOnly(2027, 1, 1)), 1000m);
-                accommodation.AddBooking(Guid.NewGuid(), new DateRange(new DateOnly(2026, 5, 10), new DateOnly(2026, 5, 15)), new DateOnly(2026, 1, 1));
-                context.Accommodations.Add(accommodation);
-                await context.SaveChangesAsync();
-            }
-
-            // Act, but with a new context and a new change tracker
-            using (var context = CreateContext(dbName))
-            {
-                var loaded = await context.Accommodations
-                    .FirstAsync(a => a.Id == accommodationId);
-
-                // Assert
-                Assert.Empty(loaded.Bookings);
-            }
-        }
+        private static Accommodation CreateAccommodation(Guid id, decimal pricePerDay = 100m) =>
+        new Accommodation(
+            id,
+            Guid.NewGuid(),
+            new Address("TestStreet", "43", "Testcity", "1919", "Jugoslavia"),
+            new DateRange(new DateOnly(2026, 1, 1), new DateOnly(2026, 12, 31)),
+            pricePerDay);
 
         [Fact]
-        public async Task GetAccommodation_WithInclude_BookingsLoadSuccessfully()
+        public async Task GetByIdAsync_ReturnsAccommodationWithItsBookings()
         {
-            // Arrange
-            var dbName = "BookMyHome_WithInclude";
             var accommodationId = Guid.NewGuid();
-
-            using (var context = CreateContext(dbName))
+            Guid bookingId;
+            
+            using (var context = CreateContext("testDb"))
             {
-                await context.Database.EnsureDeletedAsync();   // clean up
+                await context.Database.EnsureDeletedAsync();
                 await context.Database.EnsureCreatedAsync();
 
-                var accommodation = new Accommodation(accommodationId, Guid.NewGuid(), new Address("Vej1", "2", "By1", "1111", "Country1"), new DateRange(new DateOnly(2026, 1, 1), new DateOnly(2027, 1, 1)), 1000m);
-                accommodation.AddBooking(Guid.NewGuid(), new DateRange(new DateOnly(2026, 5, 10), new DateOnly(2026, 5, 15)), new DateOnly(2026, 1, 1));
-                context.Accommodations.Add(accommodation);
+                var accommodation = CreateAccommodation(accommodationId);
+
+                var today = new DateOnly(2026, 1, 1);
+                var period = new DateRange(new DateOnly(2026, 9, 10), new DateOnly(2026, 9, 11));
+                var booking = accommodation.AddBooking(Guid.NewGuid(), period, today);
+
+                bookingId = booking.Id;
+
+                context.Add(accommodation);
                 await context.SaveChangesAsync();
+
+                
             }
 
-            // Act, but with a new context and a new change tracker
-            using (var context = CreateContext(dbName))
+            using (var anotherOne = CreateContext("testDb"))
             {
-                var loaded = await context.Accommodations
-                    .Include(a => a.Bookings)
-                    .FirstAsync(a => a.Id == accommodationId);
+                var repository = new AccommodationRepository(anotherOne);
 
-                // Assert
-                Assert.Single(loaded.Bookings);
+                var accommodation = await repository.GetByIdAsync(accommodationId);
+
+                var booking = accommodation?.Bookings.FirstOrDefault(b => b.Id == bookingId);
+
+                Assert.NotNull(booking);
+                var loadedBooking = Assert.Single(accommodation.Bookings);
+                Assert.Equal(bookingId, loadedBooking.Id);
             }
+
+
         }
     }
 }

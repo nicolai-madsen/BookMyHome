@@ -64,7 +64,11 @@ namespace Application.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<BookingDto>>> GetAllBookings(Guid accommodationId)
         {
+            var accommodation = await _repository.GetByIdAsync(accommodationId);
+            if (accommodation == null)
+                return NotFound($"No accommodation exists with id: {accommodationId}.");
 
+            return Ok(accommodation.Bookings.Select(b => b.ToDto()));
         }
 
         [HttpPost("{accommodationId:guid}/bookings")]
@@ -82,8 +86,7 @@ namespace Application.Controllers
             {
                 var period = new DateRange(request.StartDate, request.EndDate);
 
-                // TODO: "today" skal komme fra en injiceret TimeProvider og bruge boligens
-                // tidszone, ikke serverens lokale tid. Se domænets today-parameter.
+                // TODO: "today" skal komme fra en injiceret TimeProvider og bruge boligens tidszone, ikke serverens lokale tid. Se domænets today-parameter.
                 var booking = accommodation.AddBooking(request.GuestId, period, DateOnly.FromDateTime(DateTime.Today));
 
                 await _unitOfWork.SaveChangesAsync();

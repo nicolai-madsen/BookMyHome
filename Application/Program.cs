@@ -1,9 +1,6 @@
 using Application.ErrorHandling;
-using Domain;
-using Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
-using Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

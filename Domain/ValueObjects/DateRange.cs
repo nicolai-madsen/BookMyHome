@@ -25,7 +25,7 @@ namespace Domain.ValueObjects
             if (other == null)
                 throw new ArgumentNullException(nameof(other));
 
-            return other.StartDate <= EndDate || other.EndDate >= StartDate; // <= "less than or equal to" er "til -og med"
+            return other.StartDate <= EndDate && other.EndDate >= StartDate; // <= "less than or equal to" er "til -og med"
         }
 
         public bool Contains(DateOnly date) // Does this date appear in this DateRange object?
