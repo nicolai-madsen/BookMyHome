@@ -1,6 +1,5 @@
 ﻿using Application.Mapping;
 using Domain;
-using Domain.Aggregates.Accommodations;
 using Domain.Exceptions;
 using Domain.Repositories;
 using Domain.ValueObjects;

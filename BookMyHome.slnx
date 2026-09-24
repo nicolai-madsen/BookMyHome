@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="Api.IntegrationTests/Api.IntegrationTests.csproj" Id="9b7ba4a4-19c7-477e-922d-b47fcb82a029" />
   <Project Path="Application/Application.csproj" Id="fa22785e-a381-467f-98e9-a3c7e1822e85" />
   <Project Path="Domain/Domain.csproj" Id="e58c28a7-848c-4007-9f98-bc7ebf97b69e" />
   <Project Path="Persistence/Persistence.csproj" Id="6193d6a5-0029-4401-a4b0-8e0746ad8b0a" />
