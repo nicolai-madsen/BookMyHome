@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Application.Mapping;
 using Domain;
+using Domain.Aggregates.Accommodations;
 using Domain.Exceptions;
 using Domain.Repositories;
 using Domain.ValueObjects;
+using Microsoft.AspNetCore.Mvc;
 using Shared.DomainDtos;
 using Shared.UseCaseDtos;
-using Application.Mapping;
 
 namespace Application.Controllers
 {
@@ -37,7 +38,10 @@ namespace Application.Controllers
             var accommodation = await _repository.GetByIdAsync(id);
 
             if (accommodation == null)
-                return NotFound($"No accommodation exists with id:{id}.");
+                return Problem(
+                    statusCode: StatusCodes.Status404NotFound,
+                    title: "Accommodation not found",
+                    detail: $"No accommodation exists with id: {id}.");
 
             var dto = new AccommodationDto(accommodation.Id, accommodation.PricePerDay);
             return Ok(dto);
@@ -49,7 +53,10 @@ namespace Application.Controllers
             var accommodation = await _repository.GetByIdAsync(accommodationId);
 
             if (accommodation == null)
-                return NotFound($"No accommodation exists with id: {accommodationId}.");
+                return Problem(
+                    statusCode: StatusCodes.Status404NotFound,
+                    title: "Accommodation not found",
+                    detail: $"No accommodation exists with id: {accommodationId}.");
 
             var booking = accommodation.Bookings.FirstOrDefault(b => b.Id == bookingId);
 
@@ -66,7 +73,10 @@ namespace Application.Controllers
         {
             var accommodation = await _repository.GetByIdAsync(accommodationId);
             if (accommodation == null)
-                return NotFound($"No accommodation exists with id: {accommodationId}.");
+                return Problem(
+                    statusCode: StatusCodes.Status404NotFound,
+                    title: "Accommodation not found",
+                    detail: $"No accommodation exists with id: {accommodationId}.");
 
             return Ok(accommodation.Bookings.Select(b => b.ToDto()));
         }
@@ -80,7 +90,10 @@ namespace Application.Controllers
         {
             var accommodation = await _repository.GetByIdAsync(accommodationId);
             if (accommodation == null)
-                return NotFound($"No accommodation exists with id: {accommodationId}.");
+                return Problem(
+                    statusCode: StatusCodes.Status404NotFound,
+                    title: "Accommodation not found",
+                    detail: $"No accommodation exists with id: {accommodationId}.");
 
             try
             {
@@ -97,6 +110,26 @@ namespace Application.Controllers
             {
                 return Conflict(ex.Message); // 409 Conflict
             }
+        }
+
+        [HttpPost("{accommodationId:guid}/bookings/{bookingId:guid}/reschedule")]
+        [ProducesResponseType<BookingDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<BookingDto>> RescheduleBooking(Guid accommodationId, Guid bookingId, RescheduleBookingRequest request)
+        {
+            var accommodation = await _repository.GetByIdAsync(accommodationId);
+            if (accommodation == null)
+                return Problem(
+                    statusCode: StatusCodes.Status404NotFound,
+                    title: "Accommodation not found",
+                    detail: $"No accommodation exists with id: {accommodationId}.");
+
+            var booking = accommodation.RescheduleBooking(bookingId, new DateRange(request.NewStartDate, request.NewEndDate), DateOnly.FromDateTime(DateTime.Today));
+
+            await _unitOfWork.SaveChangesAsync();
+            return Ok(booking.ToDto());
         }
     }
 }

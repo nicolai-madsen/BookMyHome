@@ -200,8 +200,10 @@ namespace Tests
 
             // Act & Assert
             var overlappingPeriod = new DateRange(new DateOnly(2026, 10, 8), new DateOnly(2026, 10, 12));
-            Assert.Throws<OverlappingBookingException>(() =>
+            var ex = Assert.Throws<OverlappingBookingException>(() =>
                 accommodation.RescheduleBooking(firstBooking.Id, overlappingPeriod, today));
+
+            Assert.Equal(firstBooking.Id, ex.BookingId);
         }
 
         [Fact]

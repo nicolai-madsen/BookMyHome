@@ -15,8 +15,14 @@ namespace Application.ErrorHandling
             var (status, title) = exception switch
             {
                 OverlappingBookingException => (StatusCodes.Status409Conflict, "Booking conflict"),
+                BookingNotFoundException => (StatusCodes.Status404NotFound, "Booking not found"),
+                BookingNotActiveException => (StatusCodes.Status409Conflict, "Booking conflict"),
+                BookingStartDateCannotBeInThePastException => (StatusCodes.Status400BadRequest, "Invalid booking"),
+                BookingStartAndEndDateCannotBeEqualException => (StatusCodes.Status400BadRequest, "Invalid booking"),
+                EndDateIsBeforeStartDateException => (StatusCodes.Status400BadRequest, "Invalid booking"),
 
                 ArgumentException => (StatusCodes.Status400BadRequest, "Invalid request"),
+                DomainException => (StatusCodes.Status400BadRequest, "Invalid request"),
 
                 _ => (0, "")
             };

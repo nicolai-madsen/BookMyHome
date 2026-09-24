@@ -44,7 +44,7 @@ namespace Domain.Aggregates.Accommodations
             Status = BookingStatus.Active;
         }
 
-        public void Reschedule(DateRange newPeriod, DateOnly today)
+        internal void Reschedule(DateRange newPeriod, DateOnly today) // Method is only usable by the domain, so it doesn't get called, instead of Accommodation.RescheduleBooking()
         {
             ArgumentNullException.ThrowIfNull(newPeriod);
 
