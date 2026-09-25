@@ -10,6 +10,11 @@ namespace Application.ErrorHandling
     /// </summary>
     public sealed class DomainExceptionHandler : IExceptionHandler
     {
+        private readonly IProblemDetailsService problemDetailsService;
+        public DomainExceptionHandler(IProblemDetailsService problemDetailsService)
+        {
+            this.problemDetailsService = problemDetailsService;
+        }
         public async ValueTask<bool> TryHandleAsync(HttpContext context, Exception exception, CancellationToken cancellationToken)
         {
             var (status, title) = exception switch
@@ -39,8 +44,12 @@ namespace Application.ErrorHandling
             };
 
             context.Response.StatusCode = status;
-            await context.Response.WriteAsJsonAsync(problem, cancellationToken);
-            return true;
+            return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+            {
+                HttpContext = context,
+                Exception = exception,
+                ProblemDetails = problem
+            });
         }
     }
 }

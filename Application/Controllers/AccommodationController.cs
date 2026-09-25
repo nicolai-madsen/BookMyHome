@@ -94,8 +94,6 @@ namespace Application.Controllers
                     title: "Accommodation not found",
                     detail: $"No accommodation exists with id: {accommodationId}.");
 
-            try
-            {
                 var period = new DateRange(request.StartDate, request.EndDate);
 
                 // TODO: "today" skal komme fra en injiceret TimeProvider og bruge boligens tidszone, ikke serverens lokale tid. Se domænets today-parameter.
@@ -103,12 +101,7 @@ namespace Application.Controllers
 
                 await _unitOfWork.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetBooking), new { accommodationId, bookingId = booking.Id }, booking.ToDto());
-            }
-            catch(OverlappingBookingException ex)
-            {
-                return Conflict(ex.Message); // 409 Conflict
-            }
+                return CreatedAtAction(nameof(GetBooking), new { accommodationId, bookingId = booking.Id }, booking.ToDto());        
         }
 
         [HttpPost("{accommodationId:guid}/bookings/{bookingId:guid}/reschedule")]

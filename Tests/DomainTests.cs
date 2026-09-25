@@ -194,16 +194,17 @@ namespace Tests
             var accommodation = CreateAccommodation();
             var today = new DateOnly(2026, 9, 10);
             var firstPeriod = new DateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 5));
-            var secondPeriod = new DateRange(new DateOnly(2026, 10, 10), new DateOnly(2026, 10, 15));
             var firstBooking = accommodation.AddBooking(Guid.NewGuid(), firstPeriod, today);
-            accommodation.AddBooking(Guid.NewGuid(), secondPeriod, today);
+
+            var secondPeriod = new DateRange(new DateOnly(2026, 10, 10), new DateOnly(2026, 10, 15));
+            var secondBooking =accommodation.AddBooking(Guid.NewGuid(), secondPeriod, today);
 
             // Act & Assert
             var overlappingPeriod = new DateRange(new DateOnly(2026, 10, 8), new DateOnly(2026, 10, 12));
             var ex = Assert.Throws<OverlappingBookingException>(() =>
                 accommodation.RescheduleBooking(firstBooking.Id, overlappingPeriod, today));
 
-            Assert.Equal(firstBooking.Id, ex.BookingId);
+            Assert.Equal(secondBooking.Id, ex.BookingId);
         }
 
         [Fact]
