@@ -88,6 +88,7 @@ namespace Application.Controllers
         public async Task<ActionResult<BookingDto>> CreateBooking(Guid accommodationId, CreateBookingRequest request) 
         {
             var accommodation = await _repository.GetByIdAsync(accommodationId);
+            
             if (accommodation == null)
                 return Problem(
                     statusCode: StatusCodes.Status404NotFound,
