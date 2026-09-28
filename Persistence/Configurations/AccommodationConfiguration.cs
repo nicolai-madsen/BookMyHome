@@ -44,6 +44,8 @@ namespace Persistence.Configurations
 
             builder.Metadata.FindNavigation(nameof(Accommodation.Bookings))!
                 .SetPropertyAccessMode(PropertyAccessMode.Field);
+
+            builder.Property(a => a.Version).IsConcurrencyToken();
         }
     }
 }

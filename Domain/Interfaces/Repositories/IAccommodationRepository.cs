@@ -1,6 +1,6 @@
 ﻿using Domain.Aggregates.Accommodations;
 
-namespace Domain.Repositories
+namespace Domain.Interfaces.Repositories
 {
     public interface IAccommodationRepository
     {

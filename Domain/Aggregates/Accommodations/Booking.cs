@@ -58,7 +58,7 @@ namespace Domain.Aggregates.Accommodations
             TotalPrice = PricePerDayWhenBooked * RentalPeriod.TotalDays;
         }
 
-        public void CancelByGuest() 
+        internal void CancelByGuest() 
         {
             if (Status != BookingStatus.Active)
                 throw new BookingNotActiveException(Id); // Booking, obviously, has to be active to be cancelled
@@ -66,7 +66,7 @@ namespace Domain.Aggregates.Accommodations
             Status = BookingStatus.CancelledByGuest;
         }
 
-        public void CancelByHost()
+        internal void CancelByHost()
         {
             if (Status != BookingStatus.Active)
                 throw new BookingNotActiveException(Id); // Booking, obviously, has to be active to be cancelled

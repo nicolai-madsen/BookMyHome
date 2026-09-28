@@ -1,7 +1,6 @@
 ﻿using Application.Mapping;
-using Domain;
-using Domain.Exceptions;
-using Domain.Repositories;
+using Domain.Interfaces;
+using Domain.Interfaces.Repositories;
 using Domain.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
 using Shared.DomainDtos;
@@ -96,7 +95,7 @@ namespace Application.Controllers
 
                 var period = new DateRange(request.StartDate, request.EndDate);
 
-                // TODO: "today" skal komme fra en injiceret TimeProvider og bruge boligens tidszone, ikke serverens lokale tid. Se domænets today-parameter.
+                // DO AT SOME POINT: "today" skal komme fra en injiceret TimeProvider og bruge boligens tidszone, ikke serverens lokale tid. Domain.Booking today-parameter.
                 var booking = accommodation.AddBooking(request.GuestId, period, DateOnly.FromDateTime(DateTime.Today));
 
                 await _unitOfWork.SaveChangesAsync();

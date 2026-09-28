@@ -1,6 +1,7 @@
 ﻿using Domain.Exceptions;
 using Domain.ValueObjects;
 using Domain.Enums;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Domain.Aggregates.Accommodations
 {
@@ -13,6 +14,9 @@ namespace Domain.Aggregates.Accommodations
         public Address Address { get; private set; }
         public DateRange AvailablePeriod { get; private set; }
         public decimal PricePerDay { get; private set; }
+
+        // Aggregate version for optimistic concurrency. Incremented by every method that changes the aggregate, including its bookings.
+        public int Version { get; private set; } 
 
         private Accommodation() { }
 
@@ -43,14 +47,15 @@ namespace Domain.Aggregates.Accommodations
 
             var booking = new Booking(Guid.NewGuid(), guestId, Id, period, PricePerDay, today);
             _bookings.Add(booking);
+            Version++;
             return booking;
         }
 
         public Booking RescheduleBooking(Guid bookingId, DateRange newPeriod, DateOnly today)
         {
-            var target = _bookings.FirstOrDefault(b => b.Id == bookingId);
+            var targetBooking = _bookings.FirstOrDefault(b => b.Id == bookingId);
 
-            if (target is null)
+            if (targetBooking is null)
                 throw new BookingNotFoundException(bookingId);
 
 
@@ -58,8 +63,30 @@ namespace Domain.Aggregates.Accommodations
             if (overlap is not null)
                 throw new OverlappingBookingException(overlap.Id);
 
-            target.Reschedule(newPeriod, today);
-            return target;
+            targetBooking.Reschedule(newPeriod, today);
+            Version++;
+            return targetBooking;
+        }
+
+        public Booking CancelBooking(Guid bookingId, Guid userId)
+        {
+            var targetBooking = _bookings.FirstOrDefault(b => b.Id == bookingId);
+
+            if (targetBooking is null)
+                throw new BookingNotFoundException(bookingId);
+
+            if (userId == targetBooking.GuestId)
+            {
+                targetBooking.CancelByGuest();
+                return targetBooking;
+            }
+            else if (userId == this.HostId)
+            {
+                targetBooking.CancelByGuest();
+                return targetBooking;
+            }
+            else
+                throw new UserNotFoundException(userId);
         }
     }
 }

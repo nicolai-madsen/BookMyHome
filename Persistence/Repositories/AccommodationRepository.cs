@@ -1,5 +1,5 @@
 ﻿using Domain.Aggregates.Accommodations;
-using Domain.Repositories;
+using Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.Repositories
