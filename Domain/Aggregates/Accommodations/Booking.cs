@@ -44,6 +44,11 @@ namespace Domain.Aggregates.Accommodations
             Status = BookingStatus.Active;
         }
 
+        internal void Create()
+        {
+
+        }
+
         internal void Reschedule(DateRange newPeriod, DateOnly today) // Method is only usable by the domain, so it doesn't get called, instead of Accommodation.RescheduleBooking()
         {
             ArgumentNullException.ThrowIfNull(newPeriod);
@@ -58,12 +63,17 @@ namespace Domain.Aggregates.Accommodations
             TotalPrice = PricePerDayWhenBooked * RentalPeriod.TotalDays;
         }
 
-        internal void CancelByGuest() 
+        internal void Cancel(CancellationParty cancelledBy) 
         {
             if (Status != BookingStatus.Active)
                 throw new BookingNotActiveException(Id); // Booking, obviously, has to be active to be cancelled
 
-            Status = BookingStatus.CancelledByGuest;
+            Status = cancelledBy switch
+            {
+                CancellationParty.Guest => BookingStatus.CancelledByGuest,
+                CancellationParty.Host => BookingStatus.CancelledByHost,
+                _ => throw new ArgumentOutOfRangeException(nameof(cancelledBy))
+            };
         }
 
         internal void CancelByHost()

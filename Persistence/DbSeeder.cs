@@ -32,17 +32,17 @@ namespace Persistence
                 new DateRange(new DateOnly(2024, 1, 1), new DateOnly(2033, 1, 1)),
                 150m);
 
-            accommodation1.AddBooking(
+            accommodation1.CreateBooking(
                 Guid.NewGuid(),
                 new DateRange(new DateOnly(2026, 9, 11), new DateOnly(2026, 9, 16)),
                 today);
 
-            accommodation1.AddBooking(
+            accommodation1.CreateBooking(
                 Guid.NewGuid(),
                 new DateRange(new DateOnly(2026, 2, 1), new DateOnly(2026, 2, 5)),
                 today);
 
-            accommodation1.AddBooking(
+            accommodation1.CreateBooking(
                 Guid.NewGuid(),
                 new DateRange(new DateOnly(2026, 2, 15), new DateOnly(2026, 2, 25)),
                 today);
@@ -56,17 +56,17 @@ namespace Persistence
                 new DateRange(new DateOnly(2024, 12, 1), new DateOnly(2035, 12, 6)),
                 100m);
 
-            accommodation2.AddBooking(
+            accommodation2.CreateBooking(
                Guid.NewGuid(),
                new DateRange(new DateOnly(2026, 8, 15), new DateOnly(2026, 8, 22)),
                today);
 
-            accommodation2.AddBooking(
+            accommodation2.CreateBooking(
                 Guid.NewGuid(),
                 new DateRange(new DateOnly(2026, 2, 28), new DateOnly(2026, 3, 15)),
                 today);
 
-            accommodation2.AddBooking(
+            accommodation2.CreateBooking(
                 Guid.NewGuid(),
                 new DateRange(new DateOnly(2026, 2, 10), new DateOnly(2026, 2, 13)),
                 today);
@@ -79,17 +79,17 @@ namespace Persistence
                 new DateRange(new DateOnly(2022, 1, 1), new DateOnly(2031, 1, 1)),
                 1500m);
 
-            accommodation3.AddBooking(
+            accommodation3.CreateBooking(
                Guid.NewGuid(),
                new DateRange(new DateOnly(2026, 3, 11), new DateOnly(2026, 3, 15)),
                today);
 
-            accommodation3.AddBooking(
+            accommodation3.CreateBooking(
                 Guid.NewGuid(),
                 new DateRange(new DateOnly(2026, 4, 16), new DateOnly(2026, 4, 20)),
                 today);
 
-            accommodation3.AddBooking(
+            accommodation3.CreateBooking(
                 Guid.NewGuid(),
                 new DateRange(new DateOnly(2026, 9, 10), new DateOnly(2026, 9, 16)),
                 today);

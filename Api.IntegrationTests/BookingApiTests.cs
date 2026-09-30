@@ -4,7 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Persistence;
 using Persistence.Repositories;
 using Shared.UseCaseDtos;
+using System.Net;
 using System.Net.Http.Json;
+using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Api.IntegrationTests
 {
@@ -126,6 +129,7 @@ namespace Api.IntegrationTests
             }
             var responses = await Task.WhenAll(tasks);
 
+
             // Assert: Only one request should succeed (201 Created), others should fail with 409 Conflict
             int successCount = responses.Count(r => r.StatusCode == System.Net.HttpStatusCode.Created);
             int conflictCount = responses.Count(r => r.StatusCode == System.Net.HttpStatusCode.Conflict);
@@ -134,6 +138,45 @@ namespace Api.IntegrationTests
 
             // Assert that the booking was actually created in the database with a new scope,
             // so the change tracker is not tracking the entities from the previous scope
+            using (var scope = factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<BookMyHomeContext>();
+                var accommodation = await new AccommodationRepository(context).GetByIdAsync(accommodationId);
+                Assert.NotNull(accommodation);
+                Assert.Single(accommodation.Bookings);
+            }
+        }
+
+        // Sequential twin of above test: CreateBooking_ConcurrencyOverlappingRequests_OnlyOneSucceeds.
+        // No concurrency here, so this isolates the domain's overlap check.
+        // If this passes but the parallel test fails, then the bug has to be in concurrency handling, and not domain.
+        [Fact]
+        public async Task CreateBooking_ConcurrencyOverlappingRequestsOneByOne_OnlyOneSucceeds()
+        {
+            // Arrange
+            var accommodationId = await SeedAccommodationAsync();
+
+            var bookingStart = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+            var bookingEnd = DateOnly.FromDateTime(DateTime.Now.AddDays(32));
+
+            var responses = new List<HttpResponseMessage>();
+
+            // Act
+            
+            // Send 10 requests 1 by 1
+            for (int i = 0; i < 10; i++)
+            {
+                var request = new CreateBookingRequest(Guid.NewGuid(), bookingStart, bookingEnd);
+                responses.Add(await _client.PostAsJsonAsync($"api/accommodations/{accommodationId}/bookings", request));
+            }
+
+            // Assert: Only one request should succeed (201 Created), others should fail with 409 Conflict
+            int successCount = responses.Count(r => r.StatusCode == System.Net.HttpStatusCode.Created);
+            int conflictCount = responses.Count(r => r.StatusCode == System.Net.HttpStatusCode.Conflict);
+            Assert.Equal(1, successCount);
+            Assert.Equal(9, conflictCount);
+
+            
             using (var scope = factory.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<BookMyHomeContext>();

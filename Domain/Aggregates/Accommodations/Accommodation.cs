@@ -37,14 +37,18 @@ namespace Domain.Aggregates.Accommodations
             PricePerDay = pricePerDay;
         }
 
-        public Booking AddBooking(Guid guestId, DateRange period, DateOnly today)
+        public Booking CreateBooking(Guid guestId, DateRange period, DateOnly today)
         {
-            foreach (var existing in _bookings)
+          
+            if (guestId == HostId)
+                throw new HostCannotBookOwnAccommodationException(Id, guestId);
+
+            foreach(var existing in _bookings)
             {
                 if (existing.Status == BookingStatus.Active && existing.RentalPeriod.OverlapsWith(period))
                     throw new OverlappingBookingException(existing.Id);
             }
-
+              
             var booking = new Booking(Guid.NewGuid(), guestId, Id, period, PricePerDay, today);
             _bookings.Add(booking);
             Version++;
@@ -68,25 +72,19 @@ namespace Domain.Aggregates.Accommodations
             return targetBooking;
         }
 
+        
         public Booking CancelBooking(Guid bookingId, Guid userId)
         {
-            var targetBooking = _bookings.FirstOrDefault(b => b.Id == bookingId);
+            var targetBooking = _bookings.FirstOrDefault(b => b.Id == bookingId)
+                ?? throw new BookingNotFoundException(bookingId); ;
 
-            if (targetBooking is null)
-                throw new BookingNotFoundException(bookingId);
+            var cancelledBy = userId == targetBooking.GuestId ? CancellationParty.Guest
+                : userId == HostId ? CancellationParty.Host
+                : throw new UnauthorizedDomainActionException(userId, "cancel booking", bookingId);
 
-            if (userId == targetBooking.GuestId)
-            {
-                targetBooking.CancelByGuest();
-                return targetBooking;
-            }
-            else if (userId == this.HostId)
-            {
-                targetBooking.CancelByGuest();
-                return targetBooking;
-            }
-            else
-                throw new UserNotFoundException(userId);
+            targetBooking.Cancel(cancelledBy);
+            Version++;
+            return targetBooking;
         }
     }
 }

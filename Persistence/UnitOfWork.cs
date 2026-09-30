@@ -14,7 +14,7 @@ namespace Persistence
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                throw new ConcurrencyConflictException(ex); 
+                throw new ConcurrencyConflictException("The resource was modified by another request.", ex); 
             }
         }
     }

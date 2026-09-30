@@ -39,7 +39,7 @@ namespace Tests
 
                 var today = new DateOnly(2026, 1, 1);
                 var period = new DateRange(new DateOnly(2026, 9, 10), new DateOnly(2026, 9, 11));
-                var booking = accommodation.AddBooking(Guid.NewGuid(), period, today);
+                var booking = accommodation.CreateBooking(Guid.NewGuid(), period, today);
 
                 bookingId = booking.Id;
 

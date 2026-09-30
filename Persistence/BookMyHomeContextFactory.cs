@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Logging;
 
 namespace Persistence
 {
@@ -9,8 +10,8 @@ namespace Persistence
         {
             var optionsBuilder = new DbContextOptionsBuilder<BookMyHomeContext>();
             optionsBuilder.UseSqlServer(
-                @"Server=(localdb)\mssqllocaldb;Database=BookMyHome;Trusted_Connection=True;TrustServerCertificate=True;");
-
+                @"Server=(localdb)\mssqllocaldb;Database=BookMyHome;Trusted_Connection=True;TrustServerCertificate=True;");             
+            
             return new BookMyHomeContext(optionsBuilder.Options);
         }
     }

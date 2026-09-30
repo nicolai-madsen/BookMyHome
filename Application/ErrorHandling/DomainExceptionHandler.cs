@@ -4,10 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Application.ErrorHandling
 {
-    /// <summary>
-    /// This class solves an issue where failed object initializations can throw incorrect/unprecise exceptions.
-    /// 
-    /// </summary>
     public sealed class DomainExceptionHandler : IExceptionHandler
     {
         private readonly IProblemDetailsService problemDetailsService;
@@ -19,9 +15,12 @@ namespace Application.ErrorHandling
         {
             var (status, title) = exception switch
             {
+                UnauthorizedDomainActionException => (StatusCodes.Status403Forbidden, "Forbidden"),
+                HostCannotBookOwnAccommodationException => (StatusCodes.Status403Forbidden, "Forbidden"),
                 OverlappingBookingException => (StatusCodes.Status409Conflict, "Booking conflict"),
-                BookingNotFoundException => (StatusCodes.Status404NotFound, "Booking not found"),
                 BookingNotActiveException => (StatusCodes.Status409Conflict, "Booking conflict"),
+                ConcurrencyConflictException => (StatusCodes.Status409Conflict, "Concurrency conflict"),
+                BookingNotFoundException => (StatusCodes.Status404NotFound, "Booking not found"),
                 BookingStartDateCannotBeInThePastException => (StatusCodes.Status400BadRequest, "Invalid booking"),
                 BookingStartAndEndDateCannotBeEqualException => (StatusCodes.Status400BadRequest, "Invalid booking"),
                 EndDateIsBeforeStartDateException => (StatusCodes.Status400BadRequest, "Invalid booking"),

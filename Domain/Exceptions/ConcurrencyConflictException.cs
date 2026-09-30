@@ -1,8 +1,5 @@
 ﻿namespace Domain.Exceptions
 {
-    public class ConcurrencyConflictException : Exception
-    {
-        public ConcurrencyConflictException(Exception innerException)
-            :base("The data was modified by another request.", innerException) { }
-    }
+    public sealed class ConcurrencyConflictException(string message, Exception inner)
+        : Exception(message, inner);
 }

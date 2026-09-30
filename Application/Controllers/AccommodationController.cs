@@ -96,7 +96,7 @@ namespace Application.Controllers
                 var period = new DateRange(request.StartDate, request.EndDate);
 
                 // DO AT SOME POINT: "today" skal komme fra en injiceret TimeProvider og bruge boligens tidszone, ikke serverens lokale tid. Domain.Booking today-parameter.
-                var booking = accommodation.AddBooking(request.GuestId, period, DateOnly.FromDateTime(DateTime.Today));
+                var booking = accommodation.CreateBooking(request.GuestId, period, DateOnly.FromDateTime(DateTime.Today));
 
                 await _unitOfWork.SaveChangesAsync();
 

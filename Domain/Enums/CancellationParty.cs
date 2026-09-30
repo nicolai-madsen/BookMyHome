@@ -1,0 +1,1 @@
+public enum CancellationParty { Guest, Host }
