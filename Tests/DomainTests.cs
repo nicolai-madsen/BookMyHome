@@ -1,4 +1,5 @@
 ﻿using Domain.Aggregates.Accommodations;
+using Domain.Enums;
 using Domain.Exceptions;
 using Domain.ValueObjects;
 
@@ -170,7 +171,7 @@ namespace Tests
 
             var firstGuestId = Guid.NewGuid();
             var firstPeriod = new DateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 5));
-            var firstBooking = accommodation.CreateBooking(Guid.NewGuid(), firstPeriod, today);
+            var firstBooking = accommodation.CreateBooking(firstGuestId, firstPeriod, today);
 
             accommodation.CancelBooking(firstBooking.Id, firstGuestId);
 
@@ -179,7 +180,7 @@ namespace Tests
             var newBooking = accommodation.CreateBooking(Guid.NewGuid(), overlappingPeriod, today);
 
             // Assert
-            Assert.Equal(accommodation.Id, newBooking.AccommodationId); // The new booking is added successfully
+            Assert.Equal(BookingStatus.Active, newBooking.Status); // The new booking is added successfully
             Assert.Contains(newBooking, accommodation.Bookings);
             Assert.Equal(2, accommodation.Bookings.Count); // The cancelled booking is still in the list of bookings
         }
