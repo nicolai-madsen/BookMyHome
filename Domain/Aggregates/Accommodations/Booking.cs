@@ -17,7 +17,7 @@ namespace Domain.Aggregates.Accommodations
         public decimal PricePerDayWhenBooked { get; private set; } // To store the historical data
 
         private Booking() { }
-        public Booking(Guid id, Guid guestId, Guid accommodationId, DateRange rentalPeriod, decimal pricePerDay, DateOnly today)
+        internal Booking(Guid id, Guid guestId, Guid accommodationId, DateRange rentalPeriod, decimal pricePerDay, DateOnly today)
         {
             if (id == Guid.Empty)
                 throw new ArgumentException("Id cannot be empty", nameof(id));

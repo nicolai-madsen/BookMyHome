@@ -43,6 +43,9 @@ namespace Domain.Aggregates.Accommodations
             if (guestId == HostId)
                 throw new HostCannotBookOwnAccommodationException(Id, guestId);
 
+            if (!this.AvailablePeriod.Contains(period))
+                throw new BookingIsOutsideAvailablePeriodException(period, this.AvailablePeriod);
+
             foreach(var existing in _bookings)
             {
                 if (existing.Status == BookingStatus.Active && existing.RentalPeriod.OverlapsWith(period))
@@ -62,6 +65,8 @@ namespace Domain.Aggregates.Accommodations
             if (targetBooking is null)
                 throw new BookingNotFoundException(bookingId);
 
+            //if (!this.AvailablePeriod.Contains(newPeriod))
+                //throw new BookingIsOutsideAvailablePeriodException(newPeriod, this.AvailablePeriod);
 
             var overlap = _bookings.FirstOrDefault(b => b.Id != bookingId && b.Status == BookingStatus.Active && b.RentalPeriod.OverlapsWith(newPeriod));
             if (overlap is not null)

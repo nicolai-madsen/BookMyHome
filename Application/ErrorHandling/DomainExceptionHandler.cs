@@ -17,13 +17,18 @@ namespace Application.ErrorHandling
             {
                 UnauthorizedDomainActionException => (StatusCodes.Status403Forbidden, "Forbidden"),
                 HostCannotBookOwnAccommodationException => (StatusCodes.Status403Forbidden, "Forbidden"),
+
                 OverlappingBookingException => (StatusCodes.Status409Conflict, "Booking conflict"),
                 BookingNotActiveException => (StatusCodes.Status409Conflict, "Booking conflict"),
+
                 ConcurrencyConflictException => (StatusCodes.Status409Conflict, "Concurrency conflict"),
+
                 BookingNotFoundException => (StatusCodes.Status404NotFound, "Booking not found"),
+
                 BookingStartDateCannotBeInThePastException => (StatusCodes.Status400BadRequest, "Invalid booking"),
                 BookingStartAndEndDateCannotBeEqualException => (StatusCodes.Status400BadRequest, "Invalid booking"),
                 EndDateIsBeforeStartDateException => (StatusCodes.Status400BadRequest, "Invalid booking"),
+                BookingIsOutsideAvailablePeriodException => (StatusCodes.Status400BadRequest, "Invalid booking"),
 
                 ArgumentException => (StatusCodes.Status400BadRequest, "Invalid request"),
                 DomainException => (StatusCodes.Status400BadRequest, "Invalid request"),

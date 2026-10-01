@@ -33,6 +33,14 @@ namespace Domain.ValueObjects
             return date >= StartDate && date <= EndDate;  
         }
 
+        public bool Contains(DateRange other) // Is this date range inside this other date range?
+        {
+            if (other == null)
+                throw new ArgumentNullException(nameof(other));
+
+            return other.StartDate >= StartDate && other.EndDate <= EndDate;
+        }
+
         public override string ToString()
         {
             return $"{StartDate} - {EndDate}";

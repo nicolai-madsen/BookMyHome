@@ -7,14 +7,15 @@ namespace Tests
 {
     public class DomainTests
     {
-        private static Accommodation CreateAccommodation(decimal pricePerDay = 100m, Guid? hostId = null) =>
+        private static Accommodation CreateAccommodation(DateRange? availablePeriod = null, decimal pricePerDay = 100m, Guid? hostId = null) =>
            new Accommodation(
                Guid.NewGuid(),
                hostId ?? Guid.NewGuid(),
                new Address("TestStreet", "43", "Testcity", "1919", "Jugoslavia"),
-               new DateRange(new DateOnly(2026, 1, 1), new DateOnly(2026, 12, 31)),
+               availablePeriod ?? new DateRange(new DateOnly(2026, 1, 1), new DateOnly(2026, 12, 31)),
                pricePerDay);
 
+        // Look at this test at some point ... ?? Kinda missing an important part
         [Fact]
         public void BookingConstructor_StartDayIsToday_CreatesBookingSuccessfully()
         {
@@ -22,19 +23,10 @@ namespace Tests
             var today = new DateOnly(2026, 9, 10);
             var period = new DateRange(new DateOnly(2026, 9, 10), new DateOnly(2026, 9, 12));
 
+             var accommodation = CreateAccommodation();
+
             // Act and Assert
-            var booking = new Booking(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), period, 100m, today);
-        }
-
-        [Fact]
-        public void CreateBooking_WhenGuestIsHost_Throws()
-        {
-            var hostId = Guid.NewGuid();
-            var accommodation = CreateAccommodation(hostId: hostId);   // 0 bookinger!
-            var period = new DateRange(new DateOnly(2026, 3, 1), new DateOnly(2026, 3, 5));
-
-            Assert.Throws<HostCannotBookOwnAccommodationException>(
-                () => accommodation.CreateBooking(hostId, period, new DateOnly(2026, 2, 1)));
+            var booking = accommodation.CreateBooking(Guid.NewGuid(), period, today);
         }
 
         #region DateRange Tests
@@ -66,6 +58,46 @@ namespace Tests
             Assert.Equal(expected, a.OverlapsWith(b));
         }
 
+        [Theory]
+        [InlineData(1, 5)] // Before
+        [InlineData(25, 28)] // After
+        [InlineData(17, 22)] // Start is inside, end is outside
+        [InlineData(7, 14)] // Start is outside, end is inside
+        public void CreateBooking_BookingPeriodIsOutsideAvailablePeriod_Throws(int start, int end)
+        {
+            // Arrange
+            var accommodation = CreateAccommodation(
+                availablePeriod: new DateRange(new DateOnly(2025, 12, 10), new DateOnly(2025, 12, 20)));
+
+            var today = new DateOnly(2025, 10, 9);
+            var period = new DateRange(new DateOnly(2025, 12, start), new DateOnly(2025, 12, end));
+
+            // Act & Assert
+            Assert.Throws<BookingIsOutsideAvailablePeriodException>(
+                () => accommodation.CreateBooking(Guid.NewGuid(), period, today));
+        }
+
+        [Theory]
+        [InlineData(11, 15)] // Inside
+        [InlineData(10, 13)] // Start touches
+        [InlineData(15, 20)] // End touches
+        public void CreateBooking_BookingPeriodIsInsideAvailablePeriod_CreatesBooking(int start, int end)
+        {
+            // Arrange
+            var accommodation = CreateAccommodation(
+                availablePeriod: new DateRange(new DateOnly(2025, 12, 10), new DateOnly(2025, 12, 20)));
+
+            var today = new DateOnly(2025, 10, 9);
+            var period = new DateRange(new DateOnly(2025, 12, start), new DateOnly(2025, 12, end));
+
+            // Act
+            var booking = accommodation.CreateBooking(Guid.NewGuid(), period, today);
+
+            // Assert
+            Assert.Contains(booking, accommodation.Bookings);
+            Assert.Equal(period, booking.RentalPeriod);
+        }
+
         [Fact]
         public void DateRangeConstructor_EndDateIsBeforeStartDate_Throws()
         {
@@ -94,9 +126,11 @@ namespace Tests
             var today = new DateOnly(2026, 9, 10);
             var period = new DateRange(new DateOnly(2026, 9, 9), new DateOnly(2026, 9, 12));
 
+            var accommodation = CreateAccommodation();
+
             // Act & Assert
             var exception = Assert.Throws<BookingStartDateCannotBeInThePastException>(() =>
-                new Booking(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), period, 100m, today));
+                accommodation.CreateBooking(Guid.NewGuid(), period, today));
         }
 
         [Fact]
@@ -109,6 +143,17 @@ namespace Tests
         #endregion
 
         #region CreateBooking(); Tests
+        [Fact]
+        public void CreateBooking_WhenGuestIsHost_Throws()
+        {
+            var hostId = Guid.NewGuid();
+            var accommodation = CreateAccommodation(hostId: hostId);
+            var period = new DateRange(new DateOnly(2026, 3, 1), new DateOnly(2026, 3, 5));
+
+            Assert.Throws<HostCannotBookOwnAccommodationException>(
+                () => accommodation.CreateBooking(hostId, period, new DateOnly(2026, 2, 1)));
+        }
+
         [Fact]
         public void CreateBooking_NoExistingBookings_AddsBooking()
         {
