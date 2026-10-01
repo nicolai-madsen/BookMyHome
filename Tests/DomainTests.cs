@@ -301,8 +301,28 @@ namespace Tests
             accommodation.CancelBooking(bookingToCancel.Id, bookingToCancel.GuestId);
 
             var newPeriod = new DateRange(new DateOnly(2026, 10, 10), new DateOnly(2026, 10, 15));
+
             Assert.Throws<BookingNotActiveException>(() =>
                 accommodation.RescheduleBooking(bookingToCancel.Id, newPeriod, today));
+        }
+
+        [Fact]
+        public void RescheduleBooking_RescheduleBookingToUnavailablePeriod_Throws()
+        {
+            // Arrange
+            var accommodationAvailablePeriod = new DateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 31));
+
+            var today = new DateOnly(2026, 9, 1);
+
+            var bookingPeriod = new DateRange(new DateOnly(2026, 10, 9), new DateOnly(2026, 10, 15));
+            var newBookingPeriod = new DateRange(new DateOnly(2026, 11, 9), new DateOnly(2026, 11, 15));
+            var accommodation = CreateAccommodation(accommodationAvailablePeriod);
+
+            var booking = accommodation.CreateBooking(Guid.NewGuid(), bookingPeriod, today);
+
+            // Act & Assert
+            Assert.Throws<BookingIsOutsideAvailablePeriodException>(() =>
+                 accommodation.RescheduleBooking(booking.Id, newBookingPeriod, today));
         }
         #endregion
     }
