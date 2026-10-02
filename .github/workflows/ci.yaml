@@ -34,13 +34,3 @@ jobs:
 
       - name: Test
         run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --verbosity normal
-
-  publish-image:
-    name: Build and push image
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - name: Get code
