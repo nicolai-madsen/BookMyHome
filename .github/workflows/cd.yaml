@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: ["BookMyHome_CI"]
     types: [completed]
-    branches: [master]
+    branches: [main]
 
 env:
   IMAGE_NAME: ghcr.io/nicolai-madsen/bookmyhome
