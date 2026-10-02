@@ -1,13 +1,10 @@
 ﻿using Domain.Aggregates.Accommodations;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence;
 using Persistence.Repositories;
 using Shared.UseCaseDtos;
-using System.Net;
 using System.Net.Http.Json;
-using Xunit.Abstractions;
-using Xunit.Sdk;
+
 
 namespace Api.IntegrationTests
 {
