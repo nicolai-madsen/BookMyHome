@@ -1,5 +1,4 @@
-﻿using System.Security;
-using Domain.Aggregates.Accommodations;
+﻿using Domain.Aggregates.Accommodations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence
