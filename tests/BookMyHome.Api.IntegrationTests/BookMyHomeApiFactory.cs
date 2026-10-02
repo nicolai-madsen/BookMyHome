@@ -15,11 +15,12 @@ namespace Api.IntegrationTests
             builder.UseSetting("ConnectionStrings:DefaultConnection", _dbContainer.GetConnectionString());
         }
 
-        public async Task InitializeAsync()
-        {
-            await _dbContainer.StartAsync();
-        }
+        public async ValueTask InitializeAsync() => await _dbContainer.StartAsync();
 
-        Task IAsyncLifetime.DisposeAsync() => _dbContainer.DisposeAsync().AsTask();
+        public override async ValueTask DisposeAsync()
+        {
+            await _dbContainer.DisposeAsync();
+            await base.DisposeAsync();
+        }
     }
 }

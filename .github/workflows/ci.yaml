@@ -33,4 +33,4 @@ jobs:
         run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --verbosity normal
+        run: dotnet test --solution ${{ env.SOLUTION_PATH }} --configuration Release --no-build
