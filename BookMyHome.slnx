@@ -1,8 +1,9 @@
 <Solution>
-  <Project Path="tests/BookMyHome.Api.IntegrationTests/BookMyHome.Api.IntegrationTests.csproj" Id="9b7ba4a4-19c7-477e-922d-b47fcb82a029" />
   <Project Path="src/BookMyHome.Api/BookMyHome.Api.csproj" Id="fa22785e-a381-467f-98e9-a3c7e1822e85" />
   <Project Path="src/BookMyHome.Domain/BookMyHome.Domain.csproj" Id="e58c28a7-848c-4007-9f98-bc7ebf97b69e" />
   <Project Path="src/BookMyHome.Persistence/BookMyHome.Persistence.csproj" Id="6193d6a5-0029-4401-a4b0-8e0746ad8b0a" />
   <Project Path="src/BookMyHome.Shared/BookMyHome.Shared.csproj" Id="8fb09f46-e81a-4ade-9bf8-78a2736f94be" />
+  <Project Path="tests/BookMyHome.Api.IntegrationTests/BookMyHome.Api.IntegrationTests.csproj" Id="9b7ba4a4-19c7-477e-922d-b47fcb82a029" />
   <Project Path="tests/BookMyHome.Domain.Tests/BookMyHome.Domain.Tests.csproj" Id="205771f7-6947-46a4-9f7f-c091c1d05d1f" />
+  <Project Path="tests/BookMyHome.Persistence.Tests/BookMyHome.Persistence.Tests.csproj" />
 </Solution>

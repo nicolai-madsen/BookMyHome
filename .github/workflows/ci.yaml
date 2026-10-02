@@ -1,36 +1,46 @@
-name: BookMyHome_Ci
+name: BookMyHome_CI
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - master
+
+permissions:
+  contents: read
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: "bookmyhome"
-  GITHUB_ACTOR: "nicolai-madsen"
+  DOTNET_VERSION: "10.0.x"
+  SOLUTION_PATH: "BookMyHome.slnx"
+  IMAGE_NAME: ghcr.io/nicolai-madsen/bookmyhome
 
 jobs:
-  Build-and-Deploy-CiCd:
-    name: Build and Deploy BookMyHome
+  build-and-test:
+    name: Build and test
     runs-on: ubuntu-latest
-    permissions: 
+    steps:
+      - name: Get code
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+      - name: Build
+        run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --verbosity normal
+
+  publish-image:
+    name: Build and push image
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
       contents: read
       packages: write
-
-    steps: 
-      - name: Get Code
-        uses: actions/checkout@v7
-
-      - name: Log into registry ${{env.REGISTRY}}
-        uses: docker/login-action@v4
-        with:
-            registry: ${{env.REGISTRY}}
-            username: ${{env.GITHUB_ACTOR}}
-            password: ${{secrets.GITHUB_TOKEN}}
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v7
-        with: 
-          context: src/BookMyHome
-          push: true
-          tags: ${{env.REGISTRY}}/${{env.GITHUB_ACTOR}}/${{env.IMAGE_NAME}}:latest
+    steps:
+      - name: Get code

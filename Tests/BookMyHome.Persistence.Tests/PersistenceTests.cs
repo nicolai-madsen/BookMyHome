@@ -1,20 +1,12 @@
 ﻿using Domain.Aggregates.Accommodations;
 using Domain.ValueObjects;
-using Microsoft.EntityFrameworkCore;
-using Persistence;
 using Persistence.Repositories;
 
 namespace Tests
 {
-    public class PersistenceTests
+    [Collection("SqlServer")]
+    public class PersistenceTests(SqlServerFixture db)
     {
-        private static BookMyHomeContext CreateContext(string dbName)
-        {
-            var options = new DbContextOptionsBuilder<BookMyHomeContext>()
-                .UseSqlServer($@"Server=(localdb)\mssqllocaldb;Database={dbName};Trusted_Connection=True;TrustServerCertificate=True;")
-                .Options;
-            return new BookMyHomeContext(options);
-        }
 
         private static Accommodation CreateAccommodation(Guid id, decimal pricePerDay = 100m) =>
         new Accommodation(
@@ -27,14 +19,13 @@ namespace Tests
         [Fact]
         public async Task GetByIdAsync_ReturnsAccommodationWithItsBookings()
         {
+            var dbName = $"test_{Guid.NewGuid():N}";
+
             var accommodationId = Guid.NewGuid();
             Guid bookingId;
             
-            using (var context = CreateContext("testDb"))
+            await using (var context = db.CreateContext(dbName))
             {
-                await context.Database.EnsureDeletedAsync();
-                await context.Database.EnsureCreatedAsync();
-
                 var accommodation = CreateAccommodation(accommodationId);
 
                 var today = new DateOnly(2026, 1, 1);
@@ -49,7 +40,7 @@ namespace Tests
                 
             }
 
-            using (var anotherOne = CreateContext("testDb"))
+            await using (var anotherOne = db.CreateContext(dbName))
             {
                 var repository = new AccommodationRepository(anotherOne);
 
@@ -61,8 +52,6 @@ namespace Tests
                 var loadedBooking = Assert.Single(accommodation.Bookings);
                 Assert.Equal(bookingId, loadedBooking.Id);
             }
-
-
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using Domain.Exceptions;
 using Domain.ValueObjects;
 using Domain.Enums;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Domain.Aggregates.Accommodations
 {
@@ -65,8 +64,8 @@ namespace Domain.Aggregates.Accommodations
             if (targetBooking is null)
                 throw new BookingNotFoundException(bookingId);
 
-            //if (!this.AvailablePeriod.Contains(newPeriod))
-                //throw new BookingIsOutsideAvailablePeriodException(newPeriod, this.AvailablePeriod);
+            if (!this.AvailablePeriod.Contains(newPeriod))
+                throw new BookingIsOutsideAvailablePeriodException(newPeriod, this.AvailablePeriod);
 
             var overlap = _bookings.FirstOrDefault(b => b.Id != bookingId && b.Status == BookingStatus.Active && b.RentalPeriod.OverlapsWith(newPeriod));
             if (overlap is not null)

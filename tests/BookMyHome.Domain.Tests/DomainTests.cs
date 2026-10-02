@@ -307,10 +307,10 @@ namespace Tests
         }
 
         [Fact]
-        public void RescheduleBooking_RescheduleBookingToUnavailablePeriod_Throws()
+        public void RescheduleBooking_RescheduleToUnavailablePeriod_Throws()
         {
             // Arrange
-            var accommodationAvailablePeriod = new DateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 31));
+            var accommodationAvailablePeriod = new DateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 27));
 
             var today = new DateOnly(2026, 9, 1);
 

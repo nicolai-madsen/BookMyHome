@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\BookMyHome.Domain\BookMyHome.Domain.csproj" />
-    <ProjectReference Include="..\..\src\BookMyHome.Persistence\BookMyHome.Persistence.csproj" />
   </ItemGroup>
 
   <ItemGroup>
