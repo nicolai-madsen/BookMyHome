@@ -122,5 +122,21 @@ namespace Application.Controllers
             await _unitOfWork.SaveChangesAsync();
             return Ok(booking.ToDto());
         }
+
+        [HttpPost("{accommodationId:guid}/bookings/{bookingId:guid}/cancel")]
+        public async Task<ActionResult<BookingDto>> CancelBooking(Guid accommodationId, Guid bookingId, Guid userId)
+        {
+            var accommodation = await _repository.GetByIdAsync(accommodationId);
+            if (accommodation == null)
+                return Problem(
+                    statusCode: StatusCodes.Status404NotFound,
+                    title: "Accommodation not found",
+                    detail: $"No accommodation exists with id: {accommodationId}.");
+
+            var booking = accommodation.CancelBooking(bookingId, userId);
+
+            await _unitOfWork.SaveChangesAsync();
+            return Ok(booking.ToDto());
+        }
     }
 }

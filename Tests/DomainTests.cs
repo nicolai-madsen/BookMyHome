@@ -323,6 +323,8 @@ namespace Tests
             // Act & Assert
             Assert.Throws<BookingIsOutsideAvailablePeriodException>(() =>
                  accommodation.RescheduleBooking(booking.Id, newBookingPeriod, today));
+
+            Assert.Equal(bookingPeriod, booking.RentalPeriod);
         }
         #endregion
     }
