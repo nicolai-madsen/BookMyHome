@@ -1,4 +1,4 @@
-﻿namespace Shared.DomainDtos
+﻿namespace BookMyHome.Shared.DomainDtos
 {
     public record AccommodationDto(
         Guid Id,

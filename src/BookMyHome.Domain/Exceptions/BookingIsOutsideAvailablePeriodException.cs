@@ -1,6 +1,6 @@
-﻿using Domain.ValueObjects;
+﻿using BookMyHome.Domain.ValueObjects;
 
-namespace Domain.Exceptions
+namespace BookMyHome.Domain.Exceptions
 {
     public class BookingIsOutsideAvailablePeriodException : DomainException
     {

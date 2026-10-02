@@ -1,4 +1,4 @@
-﻿namespace Domain.Exceptions
+﻿namespace BookMyHome.Domain.Exceptions
 {
     public abstract class DomainException : Exception 
         //Abstract because we don't want to create a general DomainException, but specific exceptions. Only inheritate, not instantiate   

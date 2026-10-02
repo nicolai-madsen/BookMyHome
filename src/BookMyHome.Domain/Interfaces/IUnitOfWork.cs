@@ -1,4 +1,4 @@
-﻿namespace Domain.Interfaces
+﻿namespace BookMyHome.Domain.Interfaces
 {
     public interface IUnitOfWork
     {

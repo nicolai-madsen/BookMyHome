@@ -1,12 +1,12 @@
-﻿using Application.Mapping;
-using Domain.Interfaces;
-using Domain.Interfaces.Repositories;
-using Domain.ValueObjects;
+﻿using BookMyHome.Api.Mapping;
+using BookMyHome.Domain.Interfaces;
+using BookMyHome.Domain.Interfaces.Repositories;
+using BookMyHome.Shared.DomainDtos;
+using BookMyHome.Shared.UseCaseDtos;
+using BookMyHome.Domain.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
-using Shared.DomainDtos;
-using Shared.UseCaseDtos;
 
-namespace Application.Controllers
+namespace BookMyHome.Api.Controllers
 {
     [ApiController]
     [Route("api/accommodations")]

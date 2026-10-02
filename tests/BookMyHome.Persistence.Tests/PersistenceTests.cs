@@ -1,8 +1,8 @@
-﻿using Domain.Aggregates.Accommodations;
-using Domain.ValueObjects;
-using Persistence.Repositories;
+﻿using BookMyHome.Domain.Aggregates.Accommodations;
+using BookMyHome.Domain.ValueObjects;
+using BookMyHome.Persistence.Repositories;
 
-namespace Tests
+namespace BookMyHome.Persistence.Tests
 {
     [Collection("SqlServer")]
     public class PersistenceTests(SqlServerFixture db)

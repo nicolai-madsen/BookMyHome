@@ -1,8 +1,8 @@
-﻿using Domain.Exceptions;
+﻿using BookMyHome.Domain.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Application.ErrorHandling
+namespace BookMyHome.Api.ErrorHandling
 {
     public sealed class DomainExceptionHandler : IExceptionHandler
     {

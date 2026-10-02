@@ -1,7 +1,7 @@
-﻿using Domain.Aggregates.Accommodations;
-using Domain.ValueObjects;
+﻿using BookMyHome.Domain.Aggregates.Accommodations;
+using BookMyHome.Domain.ValueObjects;
 
-namespace Persistence
+namespace BookMyHome.Persistence
 {
     public class DbSeeder
     {

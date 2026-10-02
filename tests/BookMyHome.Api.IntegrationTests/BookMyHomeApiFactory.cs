@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Testcontainers.MsSql;
 
-namespace Api.IntegrationTests
+namespace BookMyHome.Api.IntegrationTests
 {
     public class BookMyHomeApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     {

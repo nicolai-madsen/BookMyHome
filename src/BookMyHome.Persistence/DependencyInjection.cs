@@ -1,12 +1,12 @@
-﻿using Domain.Interfaces;
-using Domain.Interfaces.Repositories;
+﻿using BookMyHome.Domain.Interfaces;
+using BookMyHome.Domain.Interfaces.Repositories;
+using BookMyHome.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Persistence.Repositories;
 
-namespace Persistence
+namespace BookMyHome.Persistence
 {
     public static class DependencyInjection
     {

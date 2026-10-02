@@ -1,7 +1,7 @@
-﻿using Domain.Aggregates.Accommodations;
+﻿using BookMyHome.Domain.Aggregates.Accommodations;
 using Microsoft.EntityFrameworkCore;
 
-namespace Persistence
+namespace BookMyHome.Persistence
 {
     public class BookMyHomeContext : DbContext
     {

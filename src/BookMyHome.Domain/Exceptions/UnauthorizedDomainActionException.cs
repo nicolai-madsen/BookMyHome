@@ -1,4 +1,4 @@
-﻿namespace Domain.Exceptions
+﻿namespace BookMyHome.Domain.Exceptions
 {
     public sealed class UnauthorizedDomainActionException : DomainException
     {

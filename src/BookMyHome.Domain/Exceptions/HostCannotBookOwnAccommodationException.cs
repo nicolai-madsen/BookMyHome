@@ -1,4 +1,4 @@
-﻿using Domain.Exceptions;
+﻿using BookMyHome.Domain.Exceptions;
 
 public sealed class HostCannotBookOwnAccommodationException : DomainException
 {

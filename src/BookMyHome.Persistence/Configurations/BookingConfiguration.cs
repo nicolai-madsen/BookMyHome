@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Domain.Aggregates.Accommodations;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Domain.Enums;
+using BookMyHome.Domain.Aggregates.Accommodations;
 
-namespace Persistence.Configurations
+namespace BookMyHome.Persistence.Configurations
 {
     public class BookingConfiguration : IEntityTypeConfiguration<Booking>
     {

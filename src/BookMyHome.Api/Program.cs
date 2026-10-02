@@ -1,6 +1,6 @@
-using Application.ErrorHandling;
+using BookMyHome.Api.ErrorHandling;
+using BookMyHome.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
