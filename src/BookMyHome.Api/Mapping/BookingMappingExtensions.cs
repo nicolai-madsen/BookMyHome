@@ -1,7 +1,7 @@
-﻿using Domain.Aggregates.Accommodations;
-using Shared.DomainDtos;
+﻿using BookMyHome.Domain.Aggregates.Accommodations;
+using BookMyHome.Shared.DomainDtos;
 
-namespace Application.Mapping
+namespace BookMyHome.Api.Mapping
 {
     public static class BookingMappingExtensions
     {

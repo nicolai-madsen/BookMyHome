@@ -1,12 +1,12 @@
-﻿using Domain.Aggregates.Accommodations;
+﻿using BookMyHome.Persistence;
+using BookMyHome.Domain.Aggregates.Accommodations;
 using Microsoft.Extensions.DependencyInjection;
-using Persistence;
-using Persistence.Repositories;
-using Shared.UseCaseDtos;
+using BookMyHome.Persistence.Repositories;
+using BookMyHome.Shared.UseCaseDtos;
 using System.Net.Http.Json;
 
 
-namespace Api.IntegrationTests
+namespace BookMyHome.Api.IntegrationTests
 {
     public class BookingApiTests(BookMyHomeApiFactory factory) : IClassFixture<BookMyHomeApiFactory>
     {

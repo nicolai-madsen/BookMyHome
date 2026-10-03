@@ -1,8 +1,8 @@
-﻿using Domain.Exceptions;
-using Domain.Interfaces;
+﻿using BookMyHome.Domain.Interfaces;
+using BookMyHome.Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Persistence
+namespace BookMyHome.Persistence
 {
     public sealed class UnitOfWork(BookMyHomeContext context) : IUnitOfWork
     {

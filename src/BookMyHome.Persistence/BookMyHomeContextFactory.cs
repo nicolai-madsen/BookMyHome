@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;            
+using Microsoft.EntityFrameworkCore.Design;
 
 
-namespace Persistence
+namespace BookMyHome.Persistence
 {
     public class BookMyHomeContextFactory : IDesignTimeDbContextFactory<BookMyHomeContext>
     {

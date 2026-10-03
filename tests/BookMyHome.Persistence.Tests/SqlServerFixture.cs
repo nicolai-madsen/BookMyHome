@@ -1,6 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using BookMyHome.Persistence;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Persistence;
 using Testcontainers.MsSql;
 
 public class SqlServerFixture : IAsyncLifetime

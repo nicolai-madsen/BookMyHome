@@ -1,6 +1,6 @@
-﻿using Domain.Aggregates.Accommodations;
+﻿using BookMyHome.Domain.Aggregates.Accommodations;
 
-namespace Domain.Interfaces.Repositories
+namespace BookMyHome.Domain.Interfaces.Repositories
 {
     public interface IAccommodationRepository
     {

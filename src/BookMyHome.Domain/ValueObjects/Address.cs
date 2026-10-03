@@ -1,4 +1,4 @@
-﻿namespace Domain.ValueObjects
+﻿namespace BookMyHome.Domain.ValueObjects
 {
     public sealed record Address
     {

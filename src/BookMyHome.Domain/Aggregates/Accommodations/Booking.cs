@@ -1,8 +1,8 @@
-﻿using Domain.ValueObjects;
-using Domain.Enums;
-using Domain.Exceptions;
+﻿using BookMyHome.Domain.Exceptions;
+using BookMyHome.Domain.Enums;
+using BookMyHome.Domain.ValueObjects;
 
-namespace Domain.Aggregates.Accommodations
+namespace BookMyHome.Domain.Aggregates.Accommodations
 {
     public class Booking
     {

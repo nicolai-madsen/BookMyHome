@@ -1,4 +1,4 @@
-﻿namespace Domain.Enums
+﻿namespace BookMyHome.Domain.Enums
 {
     public enum BookingStatus
     {

@@ -1,6 +1,6 @@
-﻿using Domain.Exceptions;
+﻿using BookMyHome.Domain.Exceptions;
 
-namespace Domain.ValueObjects
+namespace BookMyHome.Domain.ValueObjects
 {
     public sealed record DateRange
     {

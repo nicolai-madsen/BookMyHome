@@ -1,9 +1,9 @@
-﻿using Domain.Aggregates.Accommodations;
-using Domain.Enums;
-using Domain.Exceptions;
-using Domain.ValueObjects;
+﻿using BookMyHome.Domain.Aggregates.Accommodations;
+using BookMyHome.Domain.Enums;
+using BookMyHome.Domain.Exceptions;
+using BookMyHome.Domain.ValueObjects;
 
-namespace Tests
+namespace BookMyHome.Domain.Tests
 {
     public class DomainTests
     {

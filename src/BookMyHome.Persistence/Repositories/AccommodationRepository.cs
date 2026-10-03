@@ -1,8 +1,8 @@
-﻿using Domain.Aggregates.Accommodations;
-using Domain.Interfaces.Repositories;
+﻿using BookMyHome.Domain.Aggregates.Accommodations;
+using BookMyHome.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
 
-namespace Persistence.Repositories
+namespace BookMyHome.Persistence.Repositories
 {
     public class AccommodationRepository : IAccommodationRepository
     {
