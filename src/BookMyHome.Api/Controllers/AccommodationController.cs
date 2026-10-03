@@ -59,9 +59,12 @@ namespace BookMyHome.Api.Controllers
             var booking = accommodation.Bookings.FirstOrDefault(b => b.Id == bookingId);
 
             if (booking is null)
-                return NotFound($"No booking exists with Id: {bookingId}.");
-            return booking.ToDto();
+                return Problem(
+                    statusCode: StatusCodes.Status404NotFound,
+                    title: "Booking not found",
+                    detail: $"No booking with id: {bookingId} exists.");
 
+            return Ok(booking.ToDto());
         }
 
         [HttpGet("{accommodationId:guid}/bookings")]
@@ -124,16 +127,22 @@ namespace BookMyHome.Api.Controllers
         }
 
         [HttpPost("{accommodationId:guid}/bookings/{bookingId:guid}/cancel")]
-        public async Task<ActionResult<BookingDto>> CancelBooking(Guid accommodationId, Guid bookingId, Guid userId)
+        [ProducesResponseType<BookingDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<BookingDto>> CancelBooking(Guid accommodationId, Guid bookingId, CancelBookingRequest request)
         {
             var accommodation = await _repository.GetByIdAsync(accommodationId);
+
             if (accommodation == null)
                 return Problem(
                     statusCode: StatusCodes.Status404NotFound,
                     title: "Accommodation not found",
                     detail: $"No accommodation exists with id: {accommodationId}.");
 
-            var booking = accommodation.CancelBooking(bookingId, userId);
+            var booking = accommodation.CancelBooking(bookingId, request.UserId);
 
             await _unitOfWork.SaveChangesAsync();
             return Ok(booking.ToDto());

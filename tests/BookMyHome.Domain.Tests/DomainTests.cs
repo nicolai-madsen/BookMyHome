@@ -327,5 +327,79 @@ namespace BookMyHome.Domain.Tests
             Assert.Equal(bookingPeriod, booking.RentalPeriod);
         }
         #endregion
+
+        #region CancelBooking_Tests
+
+        [Fact]
+        public void CancelBooking_UserIsNeitherHostNorGuest_Throws()
+        {
+            // Arrange
+            var today = new DateOnly(2026, 9, 1);
+
+            var bookingPeriod = new DateRange(new DateOnly(2026, 10, 9), new DateOnly(2026, 10, 15));
+
+            var unauthorizedUser = Guid.NewGuid();
+            var hostId = Guid.NewGuid();
+            var guestId = Guid.NewGuid();
+
+            var accommodation = CreateAccommodation(hostId: hostId);
+
+            var booking = accommodation.CreateBooking(guestId, bookingPeriod, today);
+
+            //Act & Assert
+            Assert.Throws<UnauthorizedDomainActionException>(() =>
+                accommodation.CancelBooking(booking.Id, unauthorizedUser));
+
+            Assert.Equal(BookingStatus.Active, booking.Status);
+        }
+
+        [Theory]
+        [InlineData(CancellationParty.Guest, BookingStatus.CancelledByGuest)]
+        [InlineData(CancellationParty.Host, BookingStatus.CancelledByHost)]
+        public void CancelBooking_GuestOrHostCancelsBooking_SetsMatchingStatus(CancellationParty cancelledBy, BookingStatus expectedStatus)
+        {
+            // Arrange
+            var unauthorizedUser = Guid.NewGuid();
+            var hostId = Guid.NewGuid();
+            var guestId = Guid.NewGuid();
+
+            var userId = cancelledBy == CancellationParty.Guest ? guestId : hostId;
+
+            var today = new DateOnly(2026, 9, 1);
+
+            var bookingPeriod = new DateRange(new DateOnly(2026, 10, 9), new DateOnly(2026, 10, 15));
+
+            var accommodation = CreateAccommodation(hostId: hostId);
+            var booking = accommodation.CreateBooking(guestId, bookingPeriod, today);
+
+            // Act
+            accommodation.CancelBooking(booking.Id, userId);
+
+            // Assert
+            Assert.Equal(expectedStatus, booking.Status);
+        }
+
+        [Fact]
+        public void CancelBooking_BookingAlreadyCancelled_Throws()
+        {
+            // Arrange
+            var today = new DateOnly(2026, 9, 1);
+
+            var bookingPeriod = new DateRange(new DateOnly(2026, 10, 9), new DateOnly(2026, 10, 15));
+
+            var accommodation = CreateAccommodation();
+
+            var guestId = Guid.NewGuid();
+
+            var booking = accommodation.CreateBooking(guestId, bookingPeriod, today);
+
+            accommodation.CancelBooking(booking.Id, guestId);
+
+            //Act & Assert
+            Assert.Throws<BookingNotActiveException>(() =>
+                accommodation.CancelBooking(booking.Id, guestId));
+        }
+
+        #endregion
     }
 }

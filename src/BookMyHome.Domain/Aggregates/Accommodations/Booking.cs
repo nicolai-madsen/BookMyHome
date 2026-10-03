@@ -72,16 +72,9 @@ namespace BookMyHome.Domain.Aggregates.Accommodations
             {
                 CancellationParty.Guest => BookingStatus.CancelledByGuest,
                 CancellationParty.Host => BookingStatus.CancelledByHost,
+
                 _ => throw new ArgumentOutOfRangeException(nameof(cancelledBy))
             };
-        }
-
-        internal void CancelByHost()
-        {
-            if (Status != BookingStatus.Active)
-                throw new BookingNotActiveException(Id); // Booking, obviously, has to be active to be cancelled
-
-            Status = BookingStatus.CancelledByHost;
         }
     }
 }

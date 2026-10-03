@@ -4,6 +4,10 @@ using Microsoft.Extensions.DependencyInjection;
 using BookMyHome.Persistence.Repositories;
 using BookMyHome.Shared.UseCaseDtos;
 using System.Net.Http.Json;
+using System.Net;
+using Microsoft.AspNetCore.Http.HttpResults;
+using BookMyHome.Shared.DomainDtos;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace BookMyHome.Api.IntegrationTests
@@ -53,7 +57,7 @@ namespace BookMyHome.Api.IntegrationTests
             var overlappingRequest = new CreateBookingRequest(Guid.NewGuid(), bookingStart, bookingEnd);
             var overlappingResponse = await _client.PostAsJsonAsync($"api/accommodations/{accommodationId}/bookings", overlappingRequest);
 
-            // Assert Salad:
+            // "Assert Salad":
             // Assert 409, and body type is ProblemDetails
             Assert.Equal(System.Net.HttpStatusCode.Conflict, overlappingResponse.StatusCode);
             Assert.Equal("application/problem+json", overlappingResponse.Content.Headers.ContentType?.MediaType);
@@ -181,6 +185,40 @@ namespace BookMyHome.Api.IntegrationTests
                 Assert.NotNull(accommodation);
                 Assert.Single(accommodation.Bookings);
             }
+        }
+
+        [Fact]
+        public async Task CancelBooking_UserIsNeitherHostNorGuest_Returns403WithProblemDetails()
+        {
+            // Arrange
+            var accommodationId = await SeedAccommodationAsync();
+            var guestId = Guid.NewGuid();
+            var unauthorizedUser = Guid.NewGuid();
+
+            var bookingStart = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
+            var bookingEnd = DateOnly.FromDateTime(DateTime.Now.AddDays(32));
+
+            var createResponse = await _client.PostAsJsonAsync(
+                $"api/accommodations/{accommodationId}/bookings",
+                new CreateBookingRequest(guestId, bookingStart, bookingEnd));
+
+            Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
+
+            var booking = await createResponse.Content.ReadFromJsonAsync<BookingDto>();
+
+            // Act
+            var cancelResponse = await _client.PostAsJsonAsync(
+                $"api/accommodations/{accommodationId}/bookings/{booking!.Id}/cancel",
+                new CancelBookingRequest(unauthorizedUser));
+
+            // Assert
+            Assert.Equal(HttpStatusCode.Forbidden, cancelResponse.StatusCode);
+            Assert.Equal("application/problem+json", cancelResponse.Content.Headers.ContentType?.MediaType);
+
+            var problem = await cancelResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+            Assert.NotNull(problem);
+            Assert.Equal("Forbidden", problem.Title);
+            Assert.Equal(403, problem.Status);
         }
     }
 }
