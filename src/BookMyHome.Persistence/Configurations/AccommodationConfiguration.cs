@@ -13,7 +13,7 @@ namespace BookMyHome.Persistence.Configurations
 
             builder.HasMany(a => a.Bookings)
                 .WithOne()
-                .HasForeignKey("AccommodationId")
+                .HasForeignKey(b => b.AccommodationId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Metadata
@@ -36,11 +36,6 @@ namespace BookMyHome.Persistence.Configurations
             });
 
             builder.Property(a => a.PricePerDay).HasColumnType("decimal(18,2)");
-
-            builder.HasMany(a => a.Bookings)
-                .WithOne()
-                .HasForeignKey(b => b.AccommodationId)
-                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Metadata.FindNavigation(nameof(Accommodation.Bookings))!
                 .SetPropertyAccessMode(PropertyAccessMode.Field);

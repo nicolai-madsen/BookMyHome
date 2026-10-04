@@ -31,6 +31,7 @@ namespace BookMyHome.Api.Controllers
         }
 
         [HttpGet("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<AccommodationDto>> GetById(Guid id)
         {
             var accommodation = await _repository.GetByIdAsync(id);
@@ -46,6 +47,7 @@ namespace BookMyHome.Api.Controllers
         }
 
         [HttpGet("{accommodationId:guid}/bookings/{bookingId:guid}", Name = "GetBooking")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BookingDto>> GetBooking(Guid accommodationId, Guid bookingId)
         {
             var accommodation = await _repository.GetByIdAsync(accommodationId);
