@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="BookMyHome.Application/BookMyHome.Application.csproj" Id="0098789f-3b50-4d28-8a79-8046c16caeca" />
   <Project Path="src/BookMyHome.Api/BookMyHome.Api.csproj" Id="fa22785e-a381-467f-98e9-a3c7e1822e85" />
   <Project Path="src/BookMyHome.Domain/BookMyHome.Domain.csproj" Id="e58c28a7-848c-4007-9f98-bc7ebf97b69e" />
   <Project Path="src/BookMyHome.Persistence/BookMyHome.Persistence.csproj" Id="6193d6a5-0029-4401-a4b0-8e0746ad8b0a" />

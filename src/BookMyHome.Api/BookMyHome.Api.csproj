@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\BookMyHome.Application\BookMyHome.Application.csproj" />
     <ProjectReference Include="..\BookMyHome.Domain\BookMyHome.Domain.csproj" />
     <ProjectReference Include="..\BookMyHome.Persistence\BookMyHome.Persistence.csproj" />
     <ProjectReference Include="..\BookMyHome.Shared\BookMyHome.Shared.csproj" />

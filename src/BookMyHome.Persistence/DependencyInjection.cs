@@ -4,7 +4,6 @@ using BookMyHome.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace BookMyHome.Persistence
 {
@@ -15,14 +14,12 @@ namespace BookMyHome.Persistence
             var connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-            services.AddDbContext<BookMyHomeContext>(options => 
+            services.AddDbContext<BookMyHomeContext>(options =>
                 options
-                    .UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
-                    .LogTo(Console.WriteLine, LogLevel.Information) // Send EF Core logs to the console, so they're easy to find
-                   
-                    .EnableSensitiveDataLogging()); // Shows actual parameter values. !! IMPORTANTE !! REMOVE THIS IN PRODUCTION. It's a development tool, so yea
+                    .UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
             services.AddScoped<IAccommodationRepository, AccommodationRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;

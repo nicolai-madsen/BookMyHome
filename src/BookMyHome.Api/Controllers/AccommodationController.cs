@@ -5,6 +5,7 @@ using BookMyHome.Shared.DomainDtos;
 using BookMyHome.Shared.UseCaseDtos;
 using BookMyHome.Domain.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
+using BookMyHome.Application.Accommodations.CreateAccommodation;
 
 namespace BookMyHome.Api.Controllers
 {
@@ -15,10 +16,13 @@ namespace BookMyHome.Api.Controllers
         private readonly IAccommodationRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public AccommodationController(IAccommodationRepository repository, IUnitOfWork unitOfWork)
+        private readonly ICreateAccommodationUseCase _createAccommodation;
+
+        public AccommodationController(IAccommodationRepository repository, IUnitOfWork unitOfWork, ICreateAccommodationUseCase createAccommodation)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
+            _createAccommodation = createAccommodation;
         }
 
         [HttpGet]
@@ -44,6 +48,17 @@ namespace BookMyHome.Api.Controllers
 
             var dto = new AccommodationDto(accommodation.Id, accommodation.PricePerDay);
             return Ok(dto);
+        }
+
+        [HttpPost]
+        [ProducesResponseType<AccommodationDto>(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<AccommodationDto>> Create(CreateAccommodationRequest request, CancellationToken ct = default)
+        {
+            var command = new CreateAccommodationRequest(request.HostId, request.StreetName, request.StreetNumber, request.City, request.ZipCode, request.Country, request.AvailableFrom, request.AvailableTo, request.PricePerDay);
+
+            var id = await _createAccommodation.ExecuteAsync(command, ct);
+            return CreatedAtAction(nameof(GetById), new { id }, null);
         }
 
         [HttpGet("{accommodationId:guid}/bookings/{bookingId:guid}", Name = "GetBooking")]

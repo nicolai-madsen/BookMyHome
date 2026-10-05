@@ -1,4 +1,5 @@
 ﻿using BookMyHome.Domain.Aggregates.Accommodations;
+using BookMyHome.Domain.Aggregates.Users;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookMyHome.Persistence
@@ -6,6 +7,7 @@ namespace BookMyHome.Persistence
     public class BookMyHomeContext : DbContext
     {
         public DbSet<Accommodation> Accommodations { get; set; }
+        public DbSet<User> Users { get; set; }
 
         public BookMyHomeContext(DbContextOptions<BookMyHomeContext> options)
             : base(options) { }

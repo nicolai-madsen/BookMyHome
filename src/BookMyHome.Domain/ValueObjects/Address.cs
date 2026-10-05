@@ -8,7 +8,7 @@
         public string ZipCode { get; }
         public string Country { get; }
 
-        public Address() { }
+        private Address() { }
 
         public Address(string streetName, string streetNumber, string city, string zipCode, string country)
         {

@@ -26,7 +26,7 @@ namespace BookMyHome.Domain.Aggregates.Accommodations
             if (hostId == Guid.Empty) throw new ArgumentException("Host Id cannot be empty;", nameof(hostId));
 
             ArgumentNullException.ThrowIfNull(address);
-
+            ArgumentNullException.ThrowIfNull(availablePeriod);
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pricePerDay);
 
             Id = id;
