@@ -1,10 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BookMyHome.Shared.UseCaseDtos
+﻿namespace BookMyHome.Shared.UseCaseDtos
 {
-    internal class CreateAccommodationRequest
-    {
-    }
+    public sealed record CreateAccommodationRequest(
+        Guid HostId,
+
+        string StreetName,
+        string StreetNumber,
+        string City,
+        string ZipCode,
+        string Country,
+
+        DateOnly AvailableFrom,
+        DateOnly AvailableTo,
+
+        decimal PricePerDay
+    );
 }

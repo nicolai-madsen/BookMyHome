@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\src\BookMyHome.Domain\BookMyHome.Domain.csproj" />
+    <ProjectReference Include="..\src\BookMyHome.Shared\BookMyHome.Shared.csproj" />
   </ItemGroup>
 
 </Project>

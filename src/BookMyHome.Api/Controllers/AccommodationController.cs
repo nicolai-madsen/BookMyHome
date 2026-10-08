@@ -53,11 +53,12 @@ namespace BookMyHome.Api.Controllers
         [HttpPost]
         [ProducesResponseType<AccommodationDto>(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<AccommodationDto>> Create(CreateAccommodationRequest request, CancellationToken ct = default)
+        public async Task<IActionResult> Create(CreateAccommodationRequest request, CancellationToken ct = default)
         {
-            var command = new CreateAccommodationRequest(request.HostId, request.StreetName, request.StreetNumber, request.City, request.ZipCode, request.Country, request.AvailableFrom, request.AvailableTo, request.PricePerDay);
+            var command = new CreateAccommodationUseCaseCommand(request.HostId, request.StreetName, request.StreetNumber, request.City, request.ZipCode, request.Country, request.AvailableFrom, request.AvailableTo, request.PricePerDay);
 
             var id = await _createAccommodation.ExecuteAsync(command, ct);
+
             return CreatedAtAction(nameof(GetById), new { id }, null);
         }
 

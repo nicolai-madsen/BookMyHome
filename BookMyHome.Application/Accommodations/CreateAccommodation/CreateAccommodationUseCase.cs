@@ -1,4 +1,5 @@
 ﻿using BookMyHome.Domain.Aggregates.Accommodations;
+using BookMyHome.Domain.Exceptions;
 using BookMyHome.Domain.Interfaces;
 using BookMyHome.Domain.Interfaces.Repositories;
 using BookMyHome.Domain.ValueObjects;
@@ -22,7 +23,7 @@ namespace BookMyHome.Application.Accommodations.CreateAccommodation
             var host = await _userRepository.GetByIdAsync(command.HostId) ?? throw new UserNotFoundException(command.HostId);
 
             if (!host.IsHost)
-                throw new UserNotHostException(command.HostId);
+                throw new UserIsNotHostException(command.HostId);
             
             var address = new Address(command.StreetName, command.StreetNumber, command.City, command.ZipCode, command.Country);
             var period = new DateRange(command.AvailableFrom, command.AvailableTo);

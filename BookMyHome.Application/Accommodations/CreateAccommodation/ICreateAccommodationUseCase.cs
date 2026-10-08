@@ -2,6 +2,6 @@
 {
     public interface ICreateAccommodationUseCase
     {
-        Task<Guid> ExecuteAsync(CreateAccommodationUseCaseCommand command);
+        Task<Guid> ExecuteAsync(CreateAccommodationUseCaseCommand command, CancellationToken ct = default);
     }
 }
