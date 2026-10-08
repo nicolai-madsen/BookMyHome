@@ -1,5 +1,4 @@
-﻿using BookMyHome.Application.Accommodations.CreateAccommodation;
-using BookMyHome.Domain.Interfaces;
+﻿using BookMyHome.Domain.Interfaces;
 using BookMyHome.Domain.Interfaces.Repositories;
 using BookMyHome.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -22,13 +21,6 @@ namespace BookMyHome.Persistence
             services.AddScoped<IAccommodationRepository, AccommodationRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-            return services;
-        }
-
-        public static IServiceCollection AddApplication(this IServiceCollection services)
-        {
-            services.AddScoped<ICreateAccommodationUseCase, CreateAccommodationUseCase>();
 
             return services;
         }

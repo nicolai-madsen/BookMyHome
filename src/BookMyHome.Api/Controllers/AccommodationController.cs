@@ -62,6 +62,8 @@ namespace BookMyHome.Api.Controllers
             return CreatedAtAction(nameof(GetById), new { id }, null);
         }
 
+
+
         [HttpGet("{accommodationId:guid}/bookings/{bookingId:guid}", Name = "GetBooking")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BookingDto>> GetBooking(Guid accommodationId, Guid bookingId)

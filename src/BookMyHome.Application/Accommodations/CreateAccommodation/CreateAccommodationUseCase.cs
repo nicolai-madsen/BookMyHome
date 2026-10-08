@@ -12,10 +12,12 @@ namespace BookMyHome.Application.Accommodations.CreateAccommodation
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
         
-        public CreateAccommodationUseCase(IAccommodationRepository accommodationRepository, IUserRepository userRepository)
+        public CreateAccommodationUseCase(IAccommodationRepository accommodationRepository, IUserRepository userRepository, IUnitOfWork unitOfWork)
         {
             _accommodationRepository = accommodationRepository;
             _userRepository = userRepository;
+            _unitOfWork = unitOfWork;
+
         }
 
         public async Task<Guid> ExecuteAsync(CreateAccommodationUseCaseCommand command, CancellationToken ct = default)
