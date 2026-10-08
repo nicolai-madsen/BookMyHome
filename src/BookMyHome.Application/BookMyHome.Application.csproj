@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BookMyHome.Domain\BookMyHome.Domain.csproj" />
-    <ProjectReference Include="..\src\BookMyHome.Domain\BookMyHome.Domain.csproj" />
   </ItemGroup>
 
 </Project>

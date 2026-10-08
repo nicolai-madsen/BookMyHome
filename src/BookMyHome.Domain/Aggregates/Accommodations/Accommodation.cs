@@ -13,6 +13,8 @@ namespace BookMyHome.Domain.Aggregates.Accommodations
         public Address Address { get; private set; }
         public DateRange AvailablePeriod { get; private set; }
         public decimal PricePerDay { get; private set; }
+        public DateTimeOffset? DeletedAt { get; private set; }
+        public bool IsDeleted => DeletedAt is not null;
 
         // Aggregate version for optimistic concurrency. Incremented by every method that changes the aggregate, including its bookings.
         public int Version { get; private set; } 
@@ -80,7 +82,7 @@ namespace BookMyHome.Domain.Aggregates.Accommodations
         public Booking CancelBooking(Guid bookingId, Guid userId)
         {
             var targetBooking = _bookings.FirstOrDefault(b => b.Id == bookingId)
-                ?? throw new BookingNotFoundException(bookingId); ;
+                ?? throw new BookingNotFoundException(bookingId); 
 
             var cancelledBy = userId == targetBooking.GuestId ? CancellationParty.Guest
                 : userId == HostId ? CancellationParty.Host
@@ -89,6 +91,50 @@ namespace BookMyHome.Domain.Aggregates.Accommodations
             targetBooking.Cancel(cancelledBy);
             Version++;
             return targetBooking;
+        }
+
+        public void UpdateDetails(Guid userId, Address address, DateRange availablePeriod, decimal pricePerDay, DateOnly today) 
+        {
+            EnsureIsHost(userId, "update accommodation");
+
+            ArgumentNullException.ThrowIfNull(address);
+            ArgumentNullException.ThrowIfNull(availablePeriod);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pricePerDay);
+
+            // Find booking in the new available period for the accommodation
+            var stranded = UpComingOrOngoingBookings(today)
+                .FirstOrDefault(b => !availablePeriod.Contains(b.RentalPeriod));
+
+            // If there is any bookings, throw the exception
+            if (stranded is not null)
+                throw new ActiveBookingOutsideAvailablePeriodException(stranded.Id, availablePeriod);
+
+            Address = address;
+            AvailablePeriod = availablePeriod;
+            PricePerDay = pricePerDay;
+            Version++;
+        }
+
+        public void Delete(Guid userId, DateTimeOffset now)
+        {
+            EnsureIsHost(userId, "delete accommodation");
+
+            var today = DateOnly.FromDateTime(now.DateTime);
+
+            if (UpComingOrOngoingBookings(today).Any())
+                throw new AccommodationHasActiveBookingsException(Id);
+
+            DeletedAt = now;
+        }
+
+        private IEnumerable<Booking> UpComingOrOngoingBookings(DateOnly today) =>
+            _bookings.Where(b => b.Status == BookingStatus.Active && b.RentalPeriod.EndDate >= today);
+
+        private void EnsureIsHost(Guid userId, string action)
+        {
+            if (userId != HostId)
+                throw new UnauthorizedDomainActionException(userId, action, Id);
+            // No exception? Good to go!
         }
     }
 }

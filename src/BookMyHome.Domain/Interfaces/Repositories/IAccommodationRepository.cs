@@ -6,6 +6,7 @@ namespace BookMyHome.Domain.Interfaces.Repositories
     {
         Task<Accommodation?> GetByIdAsync(Guid id);
         Task<IEnumerable<Accommodation>> GetAllAsync();
+        Task<IEnumerable<Accommodation>> GetByHostIdAsync(Guid hostId);
         void Add(Accommodation accommodation);
     }
 }

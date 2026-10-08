@@ -7,4 +7,5 @@
   <Project Path="tests/BookMyHome.Api.IntegrationTests/BookMyHome.Api.IntegrationTests.csproj" Id="9b7ba4a4-19c7-477e-922d-b47fcb82a029" />
   <Project Path="tests/BookMyHome.Domain.Tests/BookMyHome.Domain.Tests.csproj" Id="205771f7-6947-46a4-9f7f-c091c1d05d1f" />
   <Project Path="tests/BookMyHome.Persistence.Tests/BookMyHome.Persistence.Tests.csproj" />
+  <Project Path="tests/BookMyHome.Application.Tests/BookMyHome.Application.Tests.csproj" Id="93f1fe83-3bbd-4e5f-b260-0fccd7c10152" />
 </Solution>

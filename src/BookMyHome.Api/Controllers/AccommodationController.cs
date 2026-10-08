@@ -1,171 +1,87 @@
 ﻿using BookMyHome.Api.Mapping;
-using BookMyHome.Domain.Interfaces;
+using BookMyHome.Application.Accommodations.CreateAccommodation;
+using BookMyHome.Application.Accommodations.DeleteAccommodation;
+using BookMyHome.Application.Accommodations.UpdateAccommodation;
+using BookMyHome.Domain.Exceptions;
 using BookMyHome.Domain.Interfaces.Repositories;
 using BookMyHome.Shared.DomainDtos;
 using BookMyHome.Shared.UseCaseDtos;
-using BookMyHome.Domain.ValueObjects;
 using Microsoft.AspNetCore.Mvc;
-using BookMyHome.Application.Accommodations.CreateAccommodation;
 
 namespace BookMyHome.Api.Controllers
 {
     [ApiController]
     [Route("api/accommodations")]
-    public class AccommodationController : ControllerBase
+    public class AccommodationsController(
+        IAccommodationRepository repository,
+        ICreateAccommodationUseCase createAccommodation,
+        IUpdateAccommodationUseCase updateAccommodation,
+        IDeleteAccommodationUseCase deleteAccommodation) : ControllerBase
     {
-        private readonly IAccommodationRepository _repository;
-        private readonly IUnitOfWork _unitOfWork;
-
-        private readonly ICreateAccommodationUseCase _createAccommodation;
-
-        public AccommodationController(IAccommodationRepository repository, IUnitOfWork unitOfWork, ICreateAccommodationUseCase createAccommodation)
-        {
-            _repository = repository;
-            _unitOfWork = unitOfWork;
-            _createAccommodation = createAccommodation;
-        }
-
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AccommodationDto>>> GetAll()
+        public async Task<ActionResult<IEnumerable<AccommodationDto>>> GetAll([FromQuery] Guid? hostId)
         {
-            var accommodations = await _repository.GetAllAsync();
-            var dtos = accommodations.Select(a => new AccommodationDto(a.Id, a.PricePerDay));
+            var accommodations = hostId is { } id
+                ? await repository.GetByHostIdAsync(id)
+                : await repository.GetAllAsync();
 
-            return Ok(dtos);
+            return Ok(accommodations.Select(a => a.ToDto()));
         }
 
         [HttpGet("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<AccommodationDto>> GetById(Guid id)
         {
-            var accommodation = await _repository.GetByIdAsync(id);
+            var accommodation = await repository.GetByIdAsync(id)
+                ?? throw new AccommodationNotFoundException(id);
 
-            if (accommodation == null)
-                return Problem(
-                    statusCode: StatusCodes.Status404NotFound,
-                    title: "Accommodation not found",
-                    detail: $"No accommodation exists with id: {id}.");
-
-            var dto = new AccommodationDto(accommodation.Id, accommodation.PricePerDay);
-            return Ok(dto);
+            return Ok(accommodation.ToDto());
         }
 
         [HttpPost]
-        [ProducesResponseType<AccommodationDto>(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Create(CreateAccommodationRequest request, CancellationToken ct = default)
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Create(CreateAccommodationRequest request, CancellationToken ct)
         {
-            var command = new CreateAccommodationUseCaseCommand(request.HostId, request.StreetName, request.StreetNumber, request.City, request.ZipCode, request.Country, request.AvailableFrom, request.AvailableTo, request.PricePerDay);
+            var command = new CreateAccommodationUseCaseCommand(
+                request.HostId, request.StreetName, request.StreetNumber, request.City,
+                request.ZipCode, request.Country, request.AvailableFrom, request.AvailableTo,
+                request.PricePerDay);
 
-            var id = await _createAccommodation.ExecuteAsync(command, ct);
+            var id = await createAccommodation.ExecuteAsync(command, ct);
 
             return CreatedAtAction(nameof(GetById), new { id }, null);
         }
 
-
-
-        [HttpGet("{accommodationId:guid}/bookings/{bookingId:guid}", Name = "GetBooking")]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<BookingDto>> GetBooking(Guid accommodationId, Guid bookingId)
-        {
-            var accommodation = await _repository.GetByIdAsync(accommodationId);
-
-            if (accommodation == null)
-                return Problem(
-                    statusCode: StatusCodes.Status404NotFound,
-                    title: "Accommodation not found",
-                    detail: $"No accommodation exists with id: {accommodationId}.");
-
-            var booking = accommodation.Bookings.FirstOrDefault(b => b.Id == bookingId);
-
-            if (booking is null)
-                return Problem(
-                    statusCode: StatusCodes.Status404NotFound,
-                    title: "Booking not found",
-                    detail: $"No booking with id: {bookingId} exists.");
-
-            return Ok(booking.ToDto());
-        }
-
-        [HttpGet("{accommodationId:guid}/bookings")]
-        [ProducesResponseType<IEnumerable<BookingDto>>(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<BookingDto>>> GetAllBookings(Guid accommodationId)
-        {
-            var accommodation = await _repository.GetByIdAsync(accommodationId);
-            if (accommodation == null)
-                return Problem(
-                    statusCode: StatusCodes.Status404NotFound,
-                    title: "Accommodation not found",
-                    detail: $"No accommodation exists with id: {accommodationId}.");
-
-            return Ok(accommodation.Bookings.Select(b => b.ToDto()));
-        }
-
-        [HttpPost("{accommodationId:guid}/bookings")]
-        [ProducesResponseType<BookingDto>(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<BookingDto>> CreateBooking(Guid accommodationId, CreateBookingRequest request) 
-        {
-            var accommodation = await _repository.GetByIdAsync(accommodationId);
-            if (accommodation == null)
-                return Problem(
-                    statusCode: StatusCodes.Status404NotFound,
-                    title: "Accommodation not found",
-                    detail: $"No accommodation exists with id: {accommodationId}.");
-
-                var period = new DateRange(request.StartDate, request.EndDate);
-
-                // DO AT SOME POINT: "today" skal komme fra en injiceret TimeProvider og bruge boligens tidszone, ikke serverens lokale tid. Domain.Booking today-parameter.
-                var booking = accommodation.CreateBooking(request.GuestId, period, DateOnly.FromDateTime(DateTime.Today));
-
-                await _unitOfWork.SaveChangesAsync();
-
-                return CreatedAtAction(nameof(GetBooking), new { accommodationId, bookingId = booking.Id }, booking.ToDto());        
-        }
-
-        [HttpPost("{accommodationId:guid}/bookings/{bookingId:guid}/reschedule")]
-        [ProducesResponseType<BookingDto>(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<BookingDto>> RescheduleBooking(Guid accommodationId, Guid bookingId, RescheduleBookingRequest request)
-        {
-            var accommodation = await _repository.GetByIdAsync(accommodationId);
-            if (accommodation == null)
-                return Problem(
-                    statusCode: StatusCodes.Status404NotFound,
-                    title: "Accommodation not found",
-                    detail: $"No accommodation exists with id: {accommodationId}.");
-
-            var booking = accommodation.RescheduleBooking(bookingId, new DateRange(request.NewStartDate, request.NewEndDate), DateOnly.FromDateTime(DateTime.Today));
-
-            await _unitOfWork.SaveChangesAsync();
-            return Ok(booking.ToDto());
-        }
-
-        [HttpPost("{accommodationId:guid}/bookings/{bookingId:guid}/cancel")]
-        [ProducesResponseType<BookingDto>(StatusCodes.Status200OK)]
+        [HttpPut("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<ActionResult<BookingDto>> CancelBooking(Guid accommodationId, Guid bookingId, CancelBookingRequest request)
+        public async Task<IActionResult> Update(Guid id, UpdateAccommodationRequest request, CancellationToken ct)
         {
-            var accommodation = await _repository.GetByIdAsync(accommodationId);
+            var command = new UpdateAccommodationUseCaseCommand(
+                id, request.UserId, request.StreetName, request.StreetNumber, request.City,
+                request.ZipCode, request.Country, request.AvailableFrom, request.AvailableTo,
+                request.PricePerDay);
 
-            if (accommodation == null)
-                return Problem(
-                    statusCode: StatusCodes.Status404NotFound,
-                    title: "Accommodation not found",
-                    detail: $"No accommodation exists with id: {accommodationId}.");
+            await updateAccommodation.ExecuteAsync(command, ct);
+            return NoContent();
+        }
 
-            var booking = accommodation.CancelBooking(bookingId, request.UserId);
-
-            await _unitOfWork.SaveChangesAsync();
-            return Ok(booking.ToDto());
+        // HUSK!!! Opgave 11: userId fra JWT. Query string er en midlertidig løsning,fordi DELETE-requests ikke skal have en body.
+        [HttpDelete("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> Delete(Guid id, [FromQuery] Guid userId, CancellationToken ct)
+        {
+            await deleteAccommodation.ExecuteAsync(new DeleteAccommodationUseCaseCommand(id, userId), ct);
+            return NoContent();
         }
     }
 }

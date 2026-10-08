@@ -37,6 +37,8 @@ namespace BookMyHome.Persistence.Configurations
 
             builder.Property(a => a.PricePerDay).HasColumnType("decimal(18,2)");
 
+            builder.HasQueryFilter(a => a.DeletedAt == null); // A global query filter that makes all accommodation queries go; "WHERE DeletedAt IS NULL", so they wont get changed
+
             builder.Metadata.FindNavigation(nameof(Accommodation.Bookings))!
                 .SetPropertyAccessMode(PropertyAccessMode.Field);
 

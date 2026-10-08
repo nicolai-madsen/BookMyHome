@@ -30,6 +30,15 @@ namespace BookMyHome.Api.ErrorHandling
                 EndDateIsBeforeStartDateException => (StatusCodes.Status400BadRequest, "Invalid booking"),
                 BookingIsOutsideAvailablePeriodException => (StatusCodes.Status400BadRequest, "Invalid booking"),
 
+                UserIsNotHostException => (StatusCodes.Status403Forbidden, "Forbidden"),
+
+                UserNotFoundException => (StatusCodes.Status404NotFound, "User not found"),
+                AccommodationNotFoundException => (StatusCodes.Status404NotFound, "Accommodation not found"),
+
+                UserAlreadyRegisteredAsHostException => (StatusCodes.Status409Conflict, "Conflict"),
+                ActiveBookingOutsideAvailablePeriodException => (StatusCodes.Status409Conflict, "Conflict"),
+                AccommodationHasActiveBookingsException => (StatusCodes.Status409Conflict, "Conflict"),
+
                 ArgumentException => (StatusCodes.Status400BadRequest, "Invalid request"),
                 DomainException => (StatusCodes.Status400BadRequest, "Invalid request"),
 
