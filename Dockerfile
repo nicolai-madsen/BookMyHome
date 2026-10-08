@@ -7,6 +7,7 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 COPY src/BookMyHome.Api/BookMyHome.Api.csproj src/BookMyHome.Api/
+COPY src/BookMyHome.Application/BookMyHome.Application.csproj src/BookMyHome.Application/
 COPY src/BookMyHome.Domain/BookMyHome.Domain.csproj src/BookMyHome.Domain/
 COPY src/BookMyHome.Persistence/BookMyHome.Persistence.csproj src/BookMyHome.Persistence/
 COPY src/BookMyHome.Shared/BookMyHome.Shared.csproj src/BookMyHome.Shared/
