@@ -34,7 +34,7 @@ namespace BookMyHome.Application.Accommodations.CreateBooking
 
             var period = new DateRange(command.Start, command.End);
 
-            var today = DateOnly.FromDateTime(time.GetLocalNow().DateTime);
+            var today = DateOnly.FromDateTime(_time.GetLocalNow().DateTime);
 
             var booking = accommodation.CreateBooking(guest.Id, period, today);
 
