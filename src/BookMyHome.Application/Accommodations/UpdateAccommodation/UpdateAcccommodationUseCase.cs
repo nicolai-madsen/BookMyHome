@@ -12,9 +12,10 @@ namespace BookMyHome.Application.Accommodations.UpdateAccommodation
             var accommodation = await accommodations.GetByIdAsync(command.AccommodationId)
                 ?? throw new AccommodationNotFoundException(command.AccommodationId);
 
-            var address = new Address(command.StreetName, command.StreetNumber,
-                                      command.City, command.ZipCode, command.Country);
+            var address = new Address(command.StreetName, command.StreetNumber, command.City, command.ZipCode, command.Country);
+
             var period = new DateRange(command.AvailableFrom, command.AvailableTo);
+
             var today = DateOnly.FromDateTime(time.GetLocalNow().DateTime);
 
             accommodation.UpdateDetails(command.UserId, address, period, command.PricePerDay, today);
