@@ -1,11 +1,13 @@
 ﻿using BookMyHome.Api.Mapping;
+using BookMyHome.Application.Accommodations.CreateBooking;
+using BookMyHome.Application.Accommodations.RescheduleBooking;
 using BookMyHome.Domain.Aggregates.Accommodations;
 using BookMyHome.Domain.Exceptions;
 using BookMyHome.Domain.Interfaces;
 using BookMyHome.Domain.Interfaces.Repositories;
 using BookMyHome.Domain.ValueObjects;
 using BookMyHome.Shared.DomainDtos;
-using BookMyHome.Shared.UseCaseDtos;
+using BookMyHome.Shared.UseCaseDtos.Accommodations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookMyHome.Api.Controllers
@@ -13,9 +15,11 @@ namespace BookMyHome.Api.Controllers
     [ApiController]
     [Route("api/accommodations/{accommodationId:guid}/bookings")]
     public class BookingsController(
+        ICreateBookingUseCase createBooking,
         IAccommodationRepository repository,
         IUnitOfWork unitOfWork,
         TimeProvider time) : ControllerBase
+        
     {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -45,15 +49,15 @@ namespace BookMyHome.Api.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<BookingDto>> Create(Guid accommodationId, CreateBookingRequest request, CancellationToken ct)
         {
-            var accommodation = await LoadAsync(accommodationId);
+            var command = new CreateBookingCommand(
+                request.GuestId,
+                accommodationId,
+                request.StartDate,
+                request.EndDate);
 
-            var booking = accommodation.CreateBooking(
-                request.GuestId, new DateRange(request.StartDate, request.EndDate), Today());
+            var id = await createBooking.ExecuteAsync(command, ct);
 
-            await unitOfWork.SaveChangesAsync(ct);
-
-            return CreatedAtAction(nameof(GetById),
-                new { accommodationId, bookingId = booking.Id }, booking.ToDto());
+            return CreatedAtAction(nameof(GetById), new { accommodationId, bookingId = id }, null);
         }
 
         [HttpPost("{bookingId:guid}/reschedule")]
@@ -62,6 +66,8 @@ namespace BookMyHome.Api.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<BookingDto>> Reschedule(Guid accommodationId, Guid bookingId, RescheduleBookingRequest request, CancellationToken ct)
         {
+            var command = new RescheduleBookingUseCaseCommand(
+                )
             var accommodation = await LoadAsync(accommodationId);
 
             var booking = accommodation.RescheduleBooking(

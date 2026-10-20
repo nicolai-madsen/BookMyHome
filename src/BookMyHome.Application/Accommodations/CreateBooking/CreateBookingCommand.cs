@@ -3,9 +3,6 @@
     public sealed record CreateBookingCommand(
         Guid GuestId,
         Guid AccommodationId,
-        
-        DateOnly Start,
-        DateOnly End,
-        
-        decimal PricePerDay);
+        DateOnly StartDate,
+        DateOnly EndDate);
 }

@@ -1,8 +1,8 @@
-﻿using BookMyHome.Domain.Exceptions;
+﻿using BookMyHome.Domain.Aggregates.Accommodations;
+using BookMyHome.Domain.Exceptions;
 using BookMyHome.Domain.Interfaces;
 using BookMyHome.Domain.Interfaces.Repositories;
 using BookMyHome.Domain.ValueObjects;
-using System.Timers;
 
 namespace BookMyHome.Application.Accommodations.CreateBooking
 {
@@ -32,7 +32,7 @@ namespace BookMyHome.Application.Accommodations.CreateBooking
             if (accommodation is null)
                 throw new AccommodationNotFoundException(command.AccommodationId);
 
-            var period = new DateRange(command.Start, command.End);
+            var period = new DateRange(command.StartDate, command.EndDate);
 
             var today = DateOnly.FromDateTime(_time.GetLocalNow().DateTime);
 

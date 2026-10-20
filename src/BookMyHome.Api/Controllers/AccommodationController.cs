@@ -5,7 +5,7 @@ using BookMyHome.Application.Accommodations.UpdateAccommodation;
 using BookMyHome.Domain.Exceptions;
 using BookMyHome.Domain.Interfaces.Repositories;
 using BookMyHome.Shared.DomainDtos;
-using BookMyHome.Shared.UseCaseDtos;
+using BookMyHome.Shared.UseCaseDtos.Accommodations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookMyHome.Api.Controllers

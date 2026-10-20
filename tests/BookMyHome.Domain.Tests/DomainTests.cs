@@ -326,12 +326,30 @@ namespace BookMyHome.Domain.Tests
 
             Assert.Equal(bookingPeriod, booking.RentalPeriod);
         }
+
+        [Fact]
+        public void RescheduleBooking_UserDoesNotOwnBooking_Throws()
+        {
+            // Arrange
+            var accommodation = CreateAccommodation();
+            var today = new DateOnly(2026, 9, 10);
+            var period = new DateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 5));
+            var newPeriod = new DateRange(new DateOnly(2026, 10, 15), new DateOnly(2026, 10, 20));
+            var guestId = Guid.NewGuid();
+
+            var booking = accommodation.CreateBooking(guestId, period, today);
+
+            
+            // Act & Assert
+            Assert.Throws<UnauthorizedDomainActionException>(() =>
+                accommodation.RescheduleBooking(booking.Id, Guid.NewGuid(), newPeriod, today));
+        }
         #endregion
 
         #region CancelBooking_Tests
 
         [Fact]
-        public void CancelBooking_UserIsNeitherHostNorGuest_Throws()
+        public void CancelBooking_UserDoesNotOwnBooking_Throws()
         {
             // Arrange
             var today = new DateOnly(2026, 9, 1);

@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Text;
 using BookMyHome.Persistence;
 using BookMyHome.Shared.UseCaseDtos;
+using BookMyHome.Shared.UseCaseDtos.Accommodations;
 
 namespace BookMyHome.Api.IntegrationTests
 {

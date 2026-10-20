@@ -59,12 +59,15 @@ namespace BookMyHome.Domain.Aggregates.Accommodations
             return booking;
         }
 
-        public Booking RescheduleBooking(Guid bookingId, DateRange newPeriod, DateOnly today)
+        public Booking RescheduleBooking(Guid bookingId, Guid userId, DateRange newPeriod, DateOnly today)
         {
             var targetBooking = _bookings.FirstOrDefault(b => b.Id == bookingId);
 
             if (targetBooking is null)
                 throw new BookingNotFoundException(bookingId);
+
+            if (userId != targetBooking.GuestId)
+                throw new UnauthorizedDomainActionException(userId, "reschedule booking", targetBooking.GuestId);
 
             if (!this.AvailablePeriod.Contains(newPeriod))
                 throw new BookingIsOutsideAvailablePeriodException(newPeriod, this.AvailablePeriod);

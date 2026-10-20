@@ -1,4 +1,4 @@
-﻿namespace BookMyHome.Shared.UseCaseDtos
+﻿namespace BookMyHome.Shared.UseCaseDtos.Accommodations
 {
     public record CancelBookingRequest(
         Guid UserId);
