@@ -22,12 +22,10 @@ namespace BookMyHome.Application.Accommodations.RescheduleBooking
 
         public async Task ExecuteAsync(RescheduleBookingUseCaseCommand command, CancellationToken ct = default)
         {
-            var guest = await _users.GetByIdAsync(command.GuestId);
+            var guest = await _users.GetByIdAsync(command.UserId);
 
             if (guest is null)
-                throw new UserNotFoundException(command.GuestId);
-
-
+                throw new UserNotFoundException(command.UserId);
 
             var accommodation = await _accommodations.GetByIdAsync(command.AccommodationId);
 
@@ -36,7 +34,7 @@ namespace BookMyHome.Application.Accommodations.RescheduleBooking
 
             var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);
 
-            var booking = accommodation.RescheduleBooking(command.BookingId, new DateRange(command.NewStartDate, command.NewEndDate), today);
+            var booking = accommodation.RescheduleBooking(command.BookingId, command.UserId, new DateRange(command.NewStartDate, command.NewEndDate), today);
 
             await _unitOfWork.SaveChangesAsync(ct);
         }

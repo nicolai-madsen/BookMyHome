@@ -1,5 +1,4 @@
-﻿using BookMyHome.Domain.Aggregates.Accommodations;
-using BookMyHome.Domain.Exceptions;
+﻿using BookMyHome.Domain.Exceptions;
 using BookMyHome.Domain.Interfaces;
 using BookMyHome.Domain.Interfaces.Repositories;
 using BookMyHome.Domain.ValueObjects;

@@ -2,12 +2,11 @@
 using BookMyHome.Domain.Aggregates.Accommodations;
 using Microsoft.Extensions.DependencyInjection;
 using BookMyHome.Persistence.Repositories;
-using BookMyHome.Shared.UseCaseDtos;
 using System.Net.Http.Json;
 using System.Net;
-using Microsoft.AspNetCore.Http.HttpResults;
 using BookMyHome.Shared.DomainDtos;
 using Microsoft.AspNetCore.Mvc;
+using BookMyHome.Shared.UseCaseDtos.Accommodations;
 
 
 namespace BookMyHome.Api.IntegrationTests

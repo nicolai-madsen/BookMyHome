@@ -3,7 +3,7 @@
     public sealed record RescheduleBookingUseCaseCommand(
         Guid AccommodationId,
         Guid BookingId,
-        Guid GuestId,
+        Guid UserId,
         DateOnly NewStartDate,
         DateOnly NewEndDate);
 }

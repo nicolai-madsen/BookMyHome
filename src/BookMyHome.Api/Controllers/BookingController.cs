@@ -16,6 +16,7 @@ namespace BookMyHome.Api.Controllers
     [Route("api/accommodations/{accommodationId:guid}/bookings")]
     public class BookingsController(
         ICreateBookingUseCase createBooking,
+        IRescheduleBookingUseCase rescheduleBooking,
         IAccommodationRepository repository,
         IUnitOfWork unitOfWork,
         TimeProvider time) : ControllerBase
@@ -67,14 +68,15 @@ namespace BookMyHome.Api.Controllers
         public async Task<ActionResult<BookingDto>> Reschedule(Guid accommodationId, Guid bookingId, RescheduleBookingRequest request, CancellationToken ct)
         {
             var command = new RescheduleBookingUseCaseCommand(
-                )
-            var accommodation = await LoadAsync(accommodationId);
-
-            var booking = accommodation.RescheduleBooking(
-                bookingId, new DateRange(request.NewStartDate, request.NewEndDate), Today());
-
-            await unitOfWork.SaveChangesAsync(ct);
-            return Ok(booking.ToDto());
+                accommodationId,
+                bookingId,
+                request.UserId,
+                request.NewStartDate,
+                request.NewEndDate
+            );
+            
+            await rescheduleBooking.ExecuteAsync(command, ct);
+            return NoContent();
         }
 
         [HttpPost("{bookingId:guid}/cancel")]
