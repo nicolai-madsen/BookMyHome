@@ -1,0 +1,10 @@
+services:
+    usersdb:
+        image: mysql:8.0
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: usersdb
+        ports: 
+            - "3306:3306"
+        volumes:
+            - ./src/BookMyHome.AuthService/init.sql:/docker-entrypoint-initdb.d/init.sql
