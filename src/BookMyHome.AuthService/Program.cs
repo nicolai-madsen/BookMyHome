@@ -1,9 +1,13 @@
 using MySql.Data.MySqlClient;
+using BookMyHome.AuthService;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("Default") 
     ?? throw new InvalidOperationException("Connection string 'Default' is missing"); // fail-fast option, so the db fails on start if the connectionstring cant be found
+
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+builder.Services.AddSingleton<TokenService>();
 
 var app = builder.Build();
 
@@ -35,7 +39,7 @@ app.MapPost("/register", async (UserLogin input) =>
     return Results.Ok(new { id });
 });
 
-app.MapPost("/login", async (UserLogin input) =>
+app.MapPost("/login", async (UserLogin input, TokenService tokens) =>
 {
     using var connection = new MySqlConnection(connectionString);
     await connection.OpenAsync();
@@ -58,7 +62,7 @@ app.MapPost("/login", async (UserLogin input) =>
     if (!BCrypt.Net.BCrypt.Verify(input.Password, storedHash))
         return Results.Unauthorized();
 
-    return Results.Ok(new { id });
+    return Results.Ok(new { token = tokens.CreateToken(id, input.Username) });
 });
 
 app.Run();
