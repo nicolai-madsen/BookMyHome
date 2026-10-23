@@ -32,6 +32,18 @@ namespace BookMyHome.Api.Controllers
 
         [HttpGet("{bookingId:guid}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<BookingDto> GetBookingDtoAsync(Guid accommodationId, Guid bookingId)
+        {
+            var accommodation = await LoadAsync(accommodationId);
+
+            var booking = accommodation.Bookings.FirstOrDefault(b => b.Id == bookingId)
+                ?? throw new BookingNotFoundException(bookingId);
+
+            return booking.ToDto();
+        }
+
+        [HttpGet("{bookingId:guid}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BookingDto>> GetById(Guid accommodationId, Guid bookingId)
         {
             var accommodation = await LoadAsync(accommodationId);
@@ -39,7 +51,7 @@ namespace BookMyHome.Api.Controllers
             var booking = accommodation.Bookings.FirstOrDefault(b => b.Id == bookingId)
                 ?? throw new BookingNotFoundException(bookingId);
 
-            return Ok(booking.ToDto());
+            return Ok(await GetBookingDtoAsync(accommodationId, bookingId));
         }
 
         [HttpPost]
@@ -57,8 +69,9 @@ namespace BookMyHome.Api.Controllers
                 request.EndDate);
 
             var id = await createBooking.ExecuteAsync(command, ct);
+            var booking = await GetBookingDtoAsync(accommodationId, id);
 
-            return CreatedAtAction(nameof(GetById), new { accommodationId, bookingId = id }, null);
+            return CreatedAtAction(nameof(GetById), new { accommodationId, bookingId = id }, booking);
         }
 
         [HttpPost("{bookingId:guid}/reschedule")]

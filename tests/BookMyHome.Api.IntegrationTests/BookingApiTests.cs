@@ -1,12 +1,14 @@
-﻿using BookMyHome.Persistence;
-using BookMyHome.Domain.Aggregates.Accommodations;
-using Microsoft.Extensions.DependencyInjection;
-using BookMyHome.Persistence.Repositories;
+﻿using System.Net;
 using System.Net.Http.Json;
-using System.Net;
+using BookMyHome.Domain.Aggregates.Accommodations;
+using BookMyHome.Domain.Aggregates.Users;
+using BookMyHome.Domain.ValueObjects;
+using BookMyHome.Persistence;
+using BookMyHome.Persistence.Repositories;
 using BookMyHome.Shared.DomainDtos;
-using Microsoft.AspNetCore.Mvc;
 using BookMyHome.Shared.UseCaseDtos.Accommodations;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 
 namespace BookMyHome.Api.IntegrationTests
@@ -29,8 +31,8 @@ namespace BookMyHome.Api.IntegrationTests
                 var accommodation = new Accommodation(
                     accommodationId,
                     Guid.NewGuid(),
-                    new Domain.ValueObjects.Address("Street", "44", "City", "1919", "Country"),
-                    new Domain.ValueObjects.DateRange(accommodationAvailableStart, accommodationAvailableEnd),
+                    new Address("Street", "44", "City", "1919", "Country"),
+                    new DateRange(accommodationAvailableStart, accommodationAvailableEnd),
                     pricePerDay: 100m);
                 context.Accommodations.Add(accommodation);
                 await context.SaveChangesAsync();
@@ -38,31 +40,46 @@ namespace BookMyHome.Api.IntegrationTests
             return accommodationId; 
         }
 
+        private async Task<Guid> SeedUserAsync()
+        {
+            using var scope = factory.Services.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<BookMyHomeContext>();
+            var email = $"test-{Guid.NewGuid()}@test.dk";
+            var username = $"username{Guid.NewGuid()}";
+
+            var user = new User(Guid.NewGuid(), new FullName("TestDude", "Testsen"), new Email(email), new PhoneNumber("123456789"), username, "secretPassword");
+            db.Users.Add(user);
+            await db.SaveChangesAsync();
+
+            return user.Id;
+        }
+
         [Fact]
         public async Task CreateBooking_OverlappingDates_Returns409WithProblemDetails()
         {
             // Arrange
             var accommodationId = await SeedAccommodationAsync();
+            var userId = await SeedUserAsync();
 
             var bookingStart = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
             var bookingEnd = DateOnly.FromDateTime(DateTime.Now.AddDays(32));
 
             // Act 1| POST a booking, expected: 201
-            var request = new CreateBookingRequest(Guid.NewGuid(), bookingStart, bookingEnd);
+            var request = new CreateBookingRequest(userId, bookingStart, bookingEnd);
             var response = await _client.PostAsJsonAsync($"api/accommodations/{accommodationId}/bookings", request);
             Assert.Equal(System.Net.HttpStatusCode.Created, response.StatusCode);
 
             // Act 2| POST a booking with overlapping dates
-            var overlappingRequest = new CreateBookingRequest(Guid.NewGuid(), bookingStart, bookingEnd);
+            var overlappingRequest = new CreateBookingRequest(userId, bookingStart, bookingEnd);
             var overlappingResponse = await _client.PostAsJsonAsync($"api/accommodations/{accommodationId}/bookings", overlappingRequest);
 
             // "Assert Salad":
             // Assert 409, and body type is ProblemDetails
-            Assert.Equal(System.Net.HttpStatusCode.Conflict, overlappingResponse.StatusCode);
+            Assert.Equal(HttpStatusCode.Conflict, overlappingResponse.StatusCode);
             Assert.Equal("application/problem+json", overlappingResponse.Content.Headers.ContentType?.MediaType);
 
             // Assert the response body contains ProblemDetails with the expected title and status
-            var problem = await overlappingResponse.Content.ReadFromJsonAsync<Microsoft.AspNetCore.Mvc.ProblemDetails>();
+            var problem = await overlappingResponse.Content.ReadFromJsonAsync<ProblemDetails>();
             // Assert that the problem details are not null and have the expected title and status
             Assert.Equal("Booking conflict", problem.Title);
             // Assert that the problem details are not null and have the expected title and status
@@ -76,15 +93,16 @@ namespace BookMyHome.Api.IntegrationTests
         {
             // Arrange lav accommodation
             var accommodationId = await SeedAccommodationAsync();
+            var userId = await SeedUserAsync();
 
             // Act 1 POST en reschedule på en booking der ikke findes
-            var rescheduleRequest = new RescheduleBookingRequest(DateOnly.FromDateTime(DateTime.Now.AddDays(10)), DateOnly.FromDateTime(DateTime.Now.AddDays(12)));
+            var rescheduleRequest = new RescheduleBookingRequest(userId, DateOnly.FromDateTime(DateTime.Now.AddDays(10)), DateOnly.FromDateTime(DateTime.Now.AddDays(12)));
             var rescheduleResponse = await _client.PostAsJsonAsync($"api/accommodations/{accommodationId}/bookings/{Guid.NewGuid()}/reschedule", rescheduleRequest);            
 
             // Assert 404, og bodyen er ProblemDetails
             Assert.Equal(System.Net.HttpStatusCode.NotFound, rescheduleResponse.StatusCode);
             Assert.Equal("application/problem+json", rescheduleResponse.Content.Headers.ContentType?.MediaType);
-            var problem = await rescheduleResponse.Content.ReadFromJsonAsync<Microsoft.AspNetCore.Mvc.ProblemDetails>();
+            var problem = await rescheduleResponse.Content.ReadFromJsonAsync<ProblemDetails>();
             Assert.Equal("Booking not found", problem.Title);
             Assert.NotNull(problem);
             Assert.Equal(404, problem.Status);
@@ -95,10 +113,11 @@ namespace BookMyHome.Api.IntegrationTests
         {
             // Arrange create accommodation
             var accommodationId = await SeedAccommodationAsync();
+            var userId = await SeedUserAsync();
 
             // Act 1
             // POST a reschedule with endDate < startDate
-            var rescheduleRequest = new RescheduleBookingRequest(DateOnly.FromDateTime(DateTime.Now.AddDays(12)), DateOnly.FromDateTime(DateTime.Now.AddDays(10)));
+            var rescheduleRequest = new RescheduleBookingRequest(userId, DateOnly.FromDateTime(DateTime.Now.AddDays(12)), DateOnly.FromDateTime(DateTime.Now.AddDays(10)));
             var rescheduleResponse = await _client.PostAsJsonAsync($"api/accommodations/{accommodationId}/bookings/{Guid.NewGuid()}/reschedule", rescheduleRequest);
 
             // Assert 400, and body type is ProblemDetails
@@ -115,6 +134,7 @@ namespace BookMyHome.Api.IntegrationTests
         {
             // Arrange
             var accommodationId = await SeedAccommodationAsync();
+            var userId = await SeedUserAsync();
 
             var bookingStart = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
             var bookingEnd = DateOnly.FromDateTime(DateTime.Now.AddDays(32));
@@ -124,15 +144,15 @@ namespace BookMyHome.Api.IntegrationTests
             // Send 10 concurrent requests to create overlapping bookings
             for (int i = 0; i < 10; i++)
             {
-                var request = new CreateBookingRequest(Guid.NewGuid(), bookingStart, bookingEnd);
+                var request = new CreateBookingRequest(userId, bookingStart, bookingEnd);
                 tasks.Add(_client.PostAsJsonAsync($"api/accommodations/{accommodationId}/bookings", request));
             }
             var responses = await Task.WhenAll(tasks);
 
 
             // Assert: Only one request should succeed (201 Created), others should fail with 409 Conflict
-            int successCount = responses.Count(r => r.StatusCode == System.Net.HttpStatusCode.Created);
-            int conflictCount = responses.Count(r => r.StatusCode == System.Net.HttpStatusCode.Conflict);
+            int successCount = responses.Count(r => r.StatusCode == HttpStatusCode.Created);
+            int conflictCount = responses.Count(r => r.StatusCode == HttpStatusCode.Conflict);
             Assert.Equal(1, successCount);
             Assert.Equal(9, conflictCount);
 
@@ -155,6 +175,7 @@ namespace BookMyHome.Api.IntegrationTests
         {
             // Arrange
             var accommodationId = await SeedAccommodationAsync();
+            var userId = await SeedUserAsync();
 
             var bookingStart = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
             var bookingEnd = DateOnly.FromDateTime(DateTime.Now.AddDays(32));
@@ -166,17 +187,16 @@ namespace BookMyHome.Api.IntegrationTests
             // Send 10 requests 1 by 1
             for (int i = 0; i < 10; i++)
             {
-                var request = new CreateBookingRequest(Guid.NewGuid(), bookingStart, bookingEnd);
+                var request = new CreateBookingRequest(userId, bookingStart, bookingEnd);
                 responses.Add(await _client.PostAsJsonAsync($"api/accommodations/{accommodationId}/bookings", request));
             }
 
             // Assert: Only one request should succeed (201 Created), others should fail with 409 Conflict
-            int successCount = responses.Count(r => r.StatusCode == System.Net.HttpStatusCode.Created);
-            int conflictCount = responses.Count(r => r.StatusCode == System.Net.HttpStatusCode.Conflict);
+            int successCount = responses.Count(r => r.StatusCode == HttpStatusCode.Created);
+            int conflictCount = responses.Count(r => r.StatusCode == HttpStatusCode.Conflict);
             Assert.Equal(1, successCount);
             Assert.Equal(9, conflictCount);
-
-            
+     
             using (var scope = factory.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<BookMyHomeContext>();
@@ -191,7 +211,7 @@ namespace BookMyHome.Api.IntegrationTests
         {
             // Arrange
             var accommodationId = await SeedAccommodationAsync();
-            var guestId = Guid.NewGuid();
+            var guestId = await SeedUserAsync();
             var unauthorizedUser = Guid.NewGuid();
 
             var bookingStart = DateOnly.FromDateTime(DateTime.Now.AddDays(30));

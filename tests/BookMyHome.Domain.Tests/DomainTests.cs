@@ -198,11 +198,12 @@ namespace BookMyHome.Domain.Tests
             var accommodation = CreateAccommodation();
             var today = new DateOnly(2026, 9, 10);
             var firstPeriod = new DateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 5));
-            accommodation.CreateBooking(Guid.NewGuid(), firstPeriod, today);
+            var guestId = Guid.NewGuid();
+            accommodation.CreateBooking(guestId, firstPeriod, today);
             // Act & Assert
             var overlappingPeriod = new DateRange(new DateOnly(2026, 10, 4), new DateOnly(2026, 10, 10));
             Assert.Throws<OverlappingBookingException>(() =>
-                accommodation.CreateBooking(Guid.NewGuid(), overlappingPeriod, today));
+                accommodation.CreateBooking(guestId, overlappingPeriod, today));
             Assert.Single(accommodation.Bookings);
         }
 
@@ -239,11 +240,12 @@ namespace BookMyHome.Domain.Tests
             var accommodation = CreateAccommodation();
             var today = new DateOnly(2026, 9, 10);
             var originalPeriod = new DateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 5));
-            var booking = accommodation.CreateBooking(Guid.NewGuid(), originalPeriod, today);
+            var guestId = Guid.NewGuid();
+            var booking = accommodation.CreateBooking(guestId, originalPeriod, today);
 
             // Act
             var newPeriod = new DateRange(new DateOnly(2026, 10, 10), new DateOnly(2026, 10, 15));
-            accommodation.RescheduleBooking(booking.Id, newPeriod, today);
+            accommodation.RescheduleBooking(booking.Id, guestId, newPeriod, today);
 
             // Assert
             Assert.Equal(newPeriod.StartDate, booking.RentalPeriod.StartDate);
@@ -257,16 +259,17 @@ namespace BookMyHome.Domain.Tests
             // Arrange
             var accommodation = CreateAccommodation();
             var today = new DateOnly(2026, 9, 10);
+            var guestId = Guid.NewGuid();
             var firstPeriod = new DateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 5));
-            var firstBooking = accommodation.CreateBooking(Guid.NewGuid(), firstPeriod, today);
+            var firstBooking = accommodation.CreateBooking(guestId, firstPeriod, today);
 
             var secondPeriod = new DateRange(new DateOnly(2026, 10, 10), new DateOnly(2026, 10, 15));
-            var secondBooking =accommodation.CreateBooking(Guid.NewGuid(), secondPeriod, today);
+            var secondBooking =accommodation.CreateBooking(guestId, secondPeriod, today);
 
             // Act & Assert
             var overlappingPeriod = new DateRange(new DateOnly(2026, 10, 8), new DateOnly(2026, 10, 12));
             var ex = Assert.Throws<OverlappingBookingException>(() =>
-                accommodation.RescheduleBooking(firstBooking.Id, overlappingPeriod, today));
+                accommodation.RescheduleBooking(firstBooking.Id, guestId, overlappingPeriod, today));
 
             Assert.Equal(secondBooking.Id, ex.BookingId);
         }
@@ -278,12 +281,13 @@ namespace BookMyHome.Domain.Tests
             var accommodation = CreateAccommodation();
             var today = new DateOnly(2026, 9, 10);
             var period = new DateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 5));
-            var booking = accommodation.CreateBooking(Guid.NewGuid(), period, today);
+            var guestId = Guid.NewGuid();
+            var booking = accommodation.CreateBooking(guestId, period, today);
 
             // Act & Assert
             var newPeriod = new DateRange(new DateOnly(2026, 10, 10), new DateOnly(2026, 10, 15));
             Assert.Throws<BookingNotFoundException>(() =>
-                accommodation.RescheduleBooking(Guid.NewGuid(), newPeriod, today));
+                accommodation.RescheduleBooking(Guid.NewGuid(), guestId, newPeriod, today));
             Assert.Equal(period, booking.RentalPeriod);
         }
 
@@ -294,7 +298,8 @@ namespace BookMyHome.Domain.Tests
             var accommodation = CreateAccommodation();
             var today = new DateOnly(2026, 9, 10);
             var period = new DateRange(new DateOnly(2026, 10, 1), new DateOnly(2026, 10, 5));
-            accommodation.CreateBooking(Guid.NewGuid(), period, today);
+            var guestId = Guid.NewGuid();
+            accommodation.CreateBooking(guestId, period, today);
 
             // Act & Assert
             var bookingToCancel = accommodation.Bookings.First();
@@ -303,7 +308,7 @@ namespace BookMyHome.Domain.Tests
             var newPeriod = new DateRange(new DateOnly(2026, 10, 10), new DateOnly(2026, 10, 15));
 
             Assert.Throws<BookingNotActiveException>(() =>
-                accommodation.RescheduleBooking(bookingToCancel.Id, newPeriod, today));
+                accommodation.RescheduleBooking(bookingToCancel.Id, guestId, newPeriod, today));
         }
 
         [Fact]
@@ -317,12 +322,12 @@ namespace BookMyHome.Domain.Tests
             var bookingPeriod = new DateRange(new DateOnly(2026, 10, 9), new DateOnly(2026, 10, 15));
             var newBookingPeriod = new DateRange(new DateOnly(2026, 11, 9), new DateOnly(2026, 11, 15));
             var accommodation = CreateAccommodation(accommodationAvailablePeriod);
-
-            var booking = accommodation.CreateBooking(Guid.NewGuid(), bookingPeriod, today);
+            var guestId = Guid.NewGuid();
+            var booking = accommodation.CreateBooking(guestId, bookingPeriod, today);
 
             // Act & Assert
             Assert.Throws<BookingIsOutsideAvailablePeriodException>(() =>
-                 accommodation.RescheduleBooking(booking.Id, newBookingPeriod, today));
+                 accommodation.RescheduleBooking(booking.Id, guestId, newBookingPeriod, today));
 
             Assert.Equal(bookingPeriod, booking.RentalPeriod);
         }
