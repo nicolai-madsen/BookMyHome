@@ -59,18 +59,18 @@ namespace BookMyHome.Api.IntegrationTests
         {
             // Arrange
             var accommodationId = await SeedAccommodationAsync();
-            var userId = await SeedUserAsync();
+            var guestId = await SeedUserAsync();
 
             var bookingStart = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
             var bookingEnd = DateOnly.FromDateTime(DateTime.Now.AddDays(32));
 
             // Act 1| POST a booking, expected: 201
-            var request = new CreateBookingRequest(userId, bookingStart, bookingEnd);
+            var request = new CreateBookingRequest(guestId, bookingStart, bookingEnd);
             var response = await _client.PostAsJsonAsync($"api/accommodations/{accommodationId}/bookings", request);
             Assert.Equal(System.Net.HttpStatusCode.Created, response.StatusCode);
 
             // Act 2| POST a booking with overlapping dates
-            var overlappingRequest = new CreateBookingRequest(userId, bookingStart, bookingEnd);
+            var overlappingRequest = new CreateBookingRequest(guestId, bookingStart, bookingEnd);
             var overlappingResponse = await _client.PostAsJsonAsync($"api/accommodations/{accommodationId}/bookings", overlappingRequest);
 
             // "Assert Salad":
@@ -93,10 +93,10 @@ namespace BookMyHome.Api.IntegrationTests
         {
             // Arrange lav accommodation
             var accommodationId = await SeedAccommodationAsync();
-            var userId = await SeedUserAsync();
+            var guestId = await SeedUserAsync();
 
             // Act 1 POST en reschedule på en booking der ikke findes
-            var rescheduleRequest = new RescheduleBookingRequest(userId, DateOnly.FromDateTime(DateTime.Now.AddDays(10)), DateOnly.FromDateTime(DateTime.Now.AddDays(12)));
+            var rescheduleRequest = new RescheduleBookingRequest(guestId, DateOnly.FromDateTime(DateTime.Now.AddDays(10)), DateOnly.FromDateTime(DateTime.Now.AddDays(12)));
             var rescheduleResponse = await _client.PostAsJsonAsync($"api/accommodations/{accommodationId}/bookings/{Guid.NewGuid()}/reschedule", rescheduleRequest);            
 
             // Assert 404, og bodyen er ProblemDetails
@@ -113,11 +113,11 @@ namespace BookMyHome.Api.IntegrationTests
         {
             // Arrange create accommodation
             var accommodationId = await SeedAccommodationAsync();
-            var userId = await SeedUserAsync();
+            var guestId = await SeedUserAsync();
 
             // Act 1
             // POST a reschedule with endDate < startDate
-            var rescheduleRequest = new RescheduleBookingRequest(userId, DateOnly.FromDateTime(DateTime.Now.AddDays(12)), DateOnly.FromDateTime(DateTime.Now.AddDays(10)));
+            var rescheduleRequest = new RescheduleBookingRequest(guestId, DateOnly.FromDateTime(DateTime.Now.AddDays(12)), DateOnly.FromDateTime(DateTime.Now.AddDays(10)));
             var rescheduleResponse = await _client.PostAsJsonAsync($"api/accommodations/{accommodationId}/bookings/{Guid.NewGuid()}/reschedule", rescheduleRequest);
 
             // Assert 400, and body type is ProblemDetails
@@ -134,7 +134,7 @@ namespace BookMyHome.Api.IntegrationTests
         {
             // Arrange
             var accommodationId = await SeedAccommodationAsync();
-            var userId = await SeedUserAsync();
+            var guestId = await SeedUserAsync();
 
             var bookingStart = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
             var bookingEnd = DateOnly.FromDateTime(DateTime.Now.AddDays(32));
@@ -144,7 +144,7 @@ namespace BookMyHome.Api.IntegrationTests
             // Send 10 concurrent requests to create overlapping bookings
             for (int i = 0; i < 10; i++)
             {
-                var request = new CreateBookingRequest(userId, bookingStart, bookingEnd);
+                var request = new CreateBookingRequest(guestId, bookingStart, bookingEnd);
                 tasks.Add(_client.PostAsJsonAsync($"api/accommodations/{accommodationId}/bookings", request));
             }
             var responses = await Task.WhenAll(tasks);
@@ -175,7 +175,7 @@ namespace BookMyHome.Api.IntegrationTests
         {
             // Arrange
             var accommodationId = await SeedAccommodationAsync();
-            var userId = await SeedUserAsync();
+            var guestId = await SeedUserAsync();
 
             var bookingStart = DateOnly.FromDateTime(DateTime.Now.AddDays(30));
             var bookingEnd = DateOnly.FromDateTime(DateTime.Now.AddDays(32));
@@ -187,7 +187,7 @@ namespace BookMyHome.Api.IntegrationTests
             // Send 10 requests 1 by 1
             for (int i = 0; i < 10; i++)
             {
-                var request = new CreateBookingRequest(userId, bookingStart, bookingEnd);
+                var request = new CreateBookingRequest(guestId, bookingStart, bookingEnd);
                 responses.Add(await _client.PostAsJsonAsync($"api/accommodations/{accommodationId}/bookings", request));
             }
 

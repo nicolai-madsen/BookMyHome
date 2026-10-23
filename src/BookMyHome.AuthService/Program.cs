@@ -52,7 +52,8 @@ app.MapPost("/login", async (UserLogin input, TokenService tokens) =>
 
     if (!await reader.ReadAsync())
     {
-        BCrypt.Net.BCrypt.Verify(input.Password, dummyHash);
+        BCrypt.Net.BCrypt.Verify(input.Password, dummyHash); // Verify against a dummy hash so unknown usernames takes as long as a wrong password,
+                                                             // to prevent timing attacks that could reveal which accounts exists (user enumeration).
         return Results.Unauthorized();
     }
 
