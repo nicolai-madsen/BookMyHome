@@ -4,7 +4,34 @@ services:
         environment:
             MYSQL_ROOT_PASSWORD: root
             MYSQL_DATABASE: usersdb
-        ports: 
+        ports:
             - "3306:3306"
         volumes:
             - ./src/BookMyHome.AuthService/init.sql:/docker-entrypoint-initdb.d/init.sql
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+            start_period: 20s
+
+    authservice:
+        build: ./src/BookMyHome.AuthService
+        environment: 
+            ConnectionStrings__Default: "server=usersdb;user=root;password=root;database=usersdb"
+            Jwt__Key: "secret-key-atleast-32-characters"
+            Jwt__Issuer: "BookMyHome.AuthService"
+            Jwt__Audience: "BookMyHome"
+            Jwt__ExpiryMinutes: "60"
+        depends_on:
+            usersdb:
+                condition: service_healthy
+
+    gateway:
+        build: ./src/BookMyHome.Gateway
+        ports: 
+            - "8080:8080"
+        environment:
+            ReverseProxy__Clusters__authCluster__Destinations__auth__Address: "http://authservice:8080"
+        depends_on:
+            - authservice
