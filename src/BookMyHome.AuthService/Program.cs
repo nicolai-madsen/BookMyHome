@@ -1,5 +1,8 @@
 using MySql.Data.MySqlClient;
 using BookMyHome.AuthService;
+using Microsoft.Extensions.Options;
+using System.Security.Cryptography;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +11,16 @@ var connectionString = builder.Configuration.GetConnectionString("Default")
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddSingleton<TokenService>();
+builder.Services.AddSingleton(sp =>
+{
+    var jwt = sp.GetRequiredService<IOptions<JwtOptions>>().Value;
+
+    var rsa = RSA.Create();
+    rsa.ImportFromPem(File.ReadAllText(jwt.PrivateKeyPath));
+
+    var key = new RsaSecurityKey(rsa) { KeyId = jwt.KeyId };
+    return new SigningCredentials(key, SecurityAlgorithms.RsaSha256);
+});
 
 var app = builder.Build();
 
