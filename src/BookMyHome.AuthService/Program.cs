@@ -11,18 +11,27 @@ var connectionString = builder.Configuration.GetConnectionString("Default")
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddSingleton<TokenService>();
+
+// With a symmetric signing key, every service that can verify tokens can also forge them.
+// With RSA, only AuthService has the private key and can sign tokens;
+// other services verify with the public key, so a compromised service can't forge tokens.
 builder.Services.AddSingleton(sp =>
 {
     var jwt = sp.GetRequiredService<IOptions<JwtOptions>>().Value;
 
     var rsa = RSA.Create();
+ 
     rsa.ImportFromPem(File.ReadAllText(jwt.PrivateKeyPath));
 
+    // The key needs a KeyId to be set, otherwise the JWT token will not contain a "kid" header, which is required for clients to verify their tokens, if the key changes (key rotation).
     var key = new RsaSecurityKey(rsa) { KeyId = jwt.KeyId };
     return new SigningCredentials(key, SecurityAlgorithms.RsaSha256);
 });
 
 var app = builder.Build();
+
+// Fail fast: resolve the signing credentials at startup, so a missing .pem file crashes the app immediately instead of on the first login.
+_ = app.Services.GetRequiredService<SigningCredentials>();
 
 var dummyHash = BCrypt.Net.BCrypt.HashPassword("dummy-password");
 
