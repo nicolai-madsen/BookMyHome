@@ -61,7 +61,7 @@ namespace BookMyHome.Api.Controllers
         public async Task<IActionResult> Create(Guid accommodationId, CreateBookingRequest request, CancellationToken ct)
         {
             var command = new CreateBookingCommand(
-                accommodationId, User.GetUserId(), request.StartDate, request.EndDate);
+                User.GetUserId(), accommodationId, request.StartDate, request.EndDate);
 
             var id = await createBooking.ExecuteAsync(command, ct);
             return CreatedAtAction(nameof(GetById), new { accommodationId, bookingId = id }, null);
