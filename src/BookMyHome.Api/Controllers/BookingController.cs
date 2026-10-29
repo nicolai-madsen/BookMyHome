@@ -5,12 +5,10 @@ using BookMyHome.Application.Accommodations.Bookings.CreateBooking;
 using BookMyHome.Application.Accommodations.Bookings.RescheduleBooking;
 using BookMyHome.Domain.Aggregates.Accommodations;
 using BookMyHome.Domain.Exceptions;
-using BookMyHome.Domain.Interfaces;
 using BookMyHome.Domain.Interfaces.Repositories;
 using BookMyHome.Shared.DomainDtos;
 using BookMyHome.Shared.UseCaseDtos.Accommodations;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 namespace BookMyHome.Api.Controllers
 {
@@ -99,7 +97,5 @@ namespace BookMyHome.Api.Controllers
         private async Task<Accommodation> LoadAsync(Guid accommodationId) =>
             await repository.GetByIdAsync(accommodationId)
             ?? throw new AccommodationNotFoundException(accommodationId);
-
-        private DateOnly Today() => DateOnly.FromDateTime(time.GetLocalNow().DateTime);
     }
 }

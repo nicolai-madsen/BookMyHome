@@ -2,8 +2,6 @@ services:
   bookmyhome-api:
     image: ghcr.io/nicolai-madsen/bookmyhome:latest
     restart: unless-stopped
-    ports:
-      - "8001:8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection: "Server=db;Database=BookMyHome;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;"

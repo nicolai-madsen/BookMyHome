@@ -4,7 +4,7 @@ using BookMyHome.Domain.Interfaces.Repositories;
 
 namespace BookMyHome.Application.Accommodations.GetAccommodationById
 {
-    public class GetAccommodationByIdUseCase
+    public class GetAccommodationByIdUseCase : IGetAccommodationByIdUseCase
     {
         private readonly IAccommodationRepository _repository;
         public GetAccommodationByIdUseCase(IAccommodationRepository repository)

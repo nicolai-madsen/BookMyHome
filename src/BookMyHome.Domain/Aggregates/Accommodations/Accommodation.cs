@@ -40,8 +40,24 @@ namespace BookMyHome.Domain.Aggregates.Accommodations
             PricePerDay = pricePerDay;
         }
 
+        // GetById, but on the _bookings list in memory
         public Booking GetBooking(Guid bookingId) => _bookings.FirstOrDefault(b => b.Id == bookingId) 
             ?? throw new BookingNotFoundException(bookingId);
+
+        // A guest can see their own bookings
+        public Booking GetBookingVisibleTo(Guid bookingId, Guid userId)
+        {
+            var booking = GetBooking(bookingId);
+            if (booking.GuestId != userId && HostId != userId)
+                throw new BookingNotFoundException(bookingId); // Potential hackerman wont know it's there. Heheheh, information disclosure/enumeration
+            return booking;
+        }
+
+        // A host can see all bookings for an accommodation that they own
+        public IReadOnlyCollection<Booking> GetBookingsVisibleTo(Guid userId) => 
+            userId == HostId 
+                ? _bookings.ToList() 
+                : _bookings.Where(b => b.GuestId == userId).ToList();
 
         public Booking CreateBooking(Guid guestId, DateRange period, DateOnly today)
         {

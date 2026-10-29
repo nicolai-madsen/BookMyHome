@@ -1,0 +1,30 @@
+﻿@inherits LayoutComponentBase
+@inject AuthClient Auth
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <AuthorizeView>
+                <Authorized>
+                    <span>Hej, @context.User.Identity?.Name</span>
+                    <BmhButton Variant="ButtonVariant.Secondary" OnClick="LogoutAsync">Log ud</BmhButton>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="login">Log ind</a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+    async Task LogoutAsync() => await Auth.LogoutAsync();
+}

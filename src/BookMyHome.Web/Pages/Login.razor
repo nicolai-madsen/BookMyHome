@@ -1,0 +1,43 @@
+﻿@page "/login"
+@using System.ComponentModel.DataAnnotations
+@inject AuthClient Auth
+@inject NavigationManager Nav
+
+<h1>Log ind</h1>
+
+<EditForm Model="model" OnValidSubmit="SubmitAsync">
+    <DataAnnotationsValidator />
+
+    @if (error is not null)
+    {
+        <BmhAlert Kind="AlertKind.Error">@error</BmhAlert>
+    }
+
+    <BmhTextField Label="Brugernavn" @bind-Value="model.Username" />
+    <BmhTextField Label="Adgangskode" Type="password" @bind-Value="model.Password" />
+    <BmhButton Type="submit" Loading="loading">Log ind</BmhButton>
+</EditForm>
+
+@code {
+    LoginModel model = new();
+    bool loading;
+    string? error;
+
+    async Task SubmitAsync()
+    {
+        loading = true; error = null;
+
+        if (await Auth.LoginAsync(model.Username!, model.Password!))
+            Nav.NavigateTo("/");
+        else
+            error = "Forkert brugernavn eller adgangskode";
+
+        loading = false;
+    }
+
+    class LoginModel
+    {
+        [Required(ErrorMessage = "Skriv dit brugernavn")] public string? Username { get; set; }
+        [Required(ErrorMessage = "Skriv din adgangskode")] public string? Password { get; set; }
+    }
+}

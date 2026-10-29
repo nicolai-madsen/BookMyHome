@@ -1,0 +1,9 @@
+<div class="bmh-alert bmh-alert--@Kind.ToString().ToLowerInvariant()"
+     role="@(Kind == AlertKind.Error ? "alert" : "status")">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public AlertKind Kind { get; set; } = AlertKind.Info;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

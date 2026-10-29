@@ -1,0 +1,32 @@
+.bmh-field {
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    margin-bottom: var(--bmh-space);
+}
+
+.bmh-field__label {
+    font: 600 .9rem var(--bmh-font);
+    color: var(--bmh-text);
+}
+
+.bmh-field ::deep input {
+    padding: .65rem .8rem;
+    font: 1rem var(--bmh-font);
+    border: 1px solid var(--bmh-border);
+    border-radius: var(--bmh-radius);
+}
+
+    .bmh-field ::deep input:focus {
+        outline: 2px solid var(--bmh-primary);
+        outline-offset: 1px;
+    }
+
+    .bmh-field ::deep input.invalid {
+        border-color: var(--bmh-danger);
+    }
+
+.bmh-field ::deep .validation-message {
+    color: var(--bmh-danger);
+    font-size: .85rem;
+}

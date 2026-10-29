@@ -1,0 +1,22 @@
+.bmh-alert {
+    padding: .75rem 1rem;
+    border-radius: var(--bmh-radius);
+    border-left: 4px solid;
+    font: .95rem var(--bmh-font);
+    margin-bottom: var(--bmh-space);
+}
+
+.bmh-alert--info {
+    background: #eef4ff;
+    border-color: #3b6fd8;
+}
+
+.bmh-alert--success {
+    background: #edf7ee;
+    border-color: #2e7d32;
+}
+
+.bmh-alert--error {
+    background: #fdecea;
+    border-color: var(--bmh-danger);
+}

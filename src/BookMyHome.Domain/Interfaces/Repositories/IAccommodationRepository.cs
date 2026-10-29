@@ -5,8 +5,8 @@ namespace BookMyHome.Domain.Interfaces.Repositories
     public interface IAccommodationRepository
     {
         Task<Accommodation?> GetByIdAsync(Guid id);
-        Task<IEnumerable<Accommodation>> GetAllAsync();
-        Task<IEnumerable<Accommodation>> GetByHostIdAsync(Guid hostId);
+        Task<IReadOnlyCollection<Accommodation>> GetAllAsync();
+        Task<IReadOnlyCollection<Accommodation>> GetByHostIdAsync(Guid hostId);
         void Add(Accommodation accommodation);
     }
 }

@@ -1,0 +1,12 @@
+:root {
+    --bmh-primary: #ff385c;
+    --bmh-primary-hover: #e31c5f;
+    --bmh-danger: #c13515;
+    --bmh-text: #222;
+    --bmh-muted: #717171;
+    --bmh-surface: #fff;
+    --bmh-border: #ddd;
+    --bmh-radius: 8px;
+    --bmh-space: 1rem;
+    --bmh-font: system-ui, sans-serif;
+}

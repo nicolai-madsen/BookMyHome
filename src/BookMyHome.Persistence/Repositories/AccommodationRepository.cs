@@ -20,14 +20,14 @@ namespace BookMyHome.Persistence.Repositories
                 .FirstOrDefaultAsync(a => a.Id == id);
         }
 
-        public async Task<IEnumerable<Accommodation>> GetByHostIdAsync(Guid hostId)
+        public async Task<IReadOnlyCollection<Accommodation>> GetByHostIdAsync(Guid hostId)
         {
             return await _context.Accommodations
                 .Where(a => a.HostId == hostId)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Accommodation>> GetAllAsync()
+        public async Task<IReadOnlyCollection<Accommodation>> GetAllAsync()
         {
             return await _context.Accommodations
                 .Include(a => a.Bookings)

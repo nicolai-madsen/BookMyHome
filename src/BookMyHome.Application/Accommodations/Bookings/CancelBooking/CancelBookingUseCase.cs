@@ -22,7 +22,7 @@ namespace BookMyHome.Application.Accommodations.Bookings.CancelBooking
             var accommodation = await _repository.GetByIdAsync(command.AccommodationId) ?? throw new AccommodationNotFoundException(command.AccommodationId);
 
             var today = DateOnly.FromDateTime(timeProvider.GetLocalNow().DateTime);
-            accommodation.CancelBooking(command.BookingId, command.UserId, today);
+            accommodation.CancelBooking(command.BookingId, command.UserId);
 
             await _unitOfWork.SaveChangesAsync(ct);
         }

@@ -1,0 +1,51 @@
+﻿.bmh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .65rem 1.25rem;
+    border-radius: var(--bmh-radius);
+    font: 600 1rem var(--bmh-font);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background .15s;
+}
+
+    .bmh-btn:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+
+.bmh-btn--primary {
+    background: var(--bmh-primary);
+    color: #fff;
+}
+
+    .bmh-btn--primary:hover:not(:disabled) {
+        background: var(--bmh-primary-hover);
+    }
+
+.bmh-btn--secondary {
+    background: var(--bmh-surface);
+    color: var(--bmh-text);
+    border-color: var(--bmh-text);
+}
+
+.bmh-btn--danger {
+    background: var(--bmh-danger);
+    color: #fff;
+}
+
+.bmh-spinner {
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: bmh-spin .7s linear infinite;
+}
+
+@keyframes bmh-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
