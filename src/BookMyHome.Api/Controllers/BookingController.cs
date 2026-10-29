@@ -30,9 +30,7 @@ namespace BookMyHome.Api.Controllers
             return Ok(accommodation.Bookings.ToDtos());
         }
 
-        [HttpGet("{bookingId:guid}")]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<BookingDto> GetBookingDtoAsync(Guid accommodationId, Guid bookingId)
+        private async Task<BookingDto> GetBookingDtoAsync(Guid accommodationId, Guid bookingId)
         {
             var accommodation = await LoadAsync(accommodationId);
 

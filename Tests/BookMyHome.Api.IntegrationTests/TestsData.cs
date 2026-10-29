@@ -14,5 +14,11 @@ namespace BookMyHome.Api.IntegrationTests
         public static CreateAccommodationRequest Accommodation(decimal pricePerDay = 500m) =>
             new("Testvej", "1", "Vejle", "7100", "Danmark",
                Today, Today.AddYears(1), pricePerDay);
+
+        public static RescheduleBookingRequest Reschedule(int startInDays = 60, int nights = 3)
+        {
+            var s = Today.AddDays(startInDays);
+            return new RescheduleBookingRequest(s, s.AddDays(nights));
+        }
     }
 }

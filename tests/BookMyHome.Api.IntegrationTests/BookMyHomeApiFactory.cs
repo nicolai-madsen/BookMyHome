@@ -22,8 +22,8 @@ namespace BookMyHome.Api.IntegrationTests
             builder.ConfigureTestServices(services =>
             {
                 // Fake login: bruger header i stedet for rigtig JWT
-                services.AddAuthentication(TestAuthHandler.Scheme)
-                    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.Scheme, _ => { });
+                services.AddAuthentication(TestAuthHandler.SchemeName)
+                    .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
 
                 // Freeze the clock
                 services.RemoveAll<TimeProvider>();
@@ -38,6 +38,13 @@ namespace BookMyHome.Api.IntegrationTests
         {
             await _dbContainer.DisposeAsync();
             await base.DisposeAsync();
+        }
+
+        public HttpClient CreateClientAs(Guid userId)
+        {
+            var clients = CreateClient();
+            clients.DefaultRequestHeaders.Add(TestAuthHandler.UserIdHeader, userId.ToString());
+            return clients;
         }
     }
 }

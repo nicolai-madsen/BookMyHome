@@ -10,7 +10,7 @@ public class TestAuthHandler(
     ILoggerFactory logger,
     UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
 {
-    public const string Scheme = "Test";
+    public const string SchemeName = "Test";
     public const string UserIdHeader = "X-Test-UserId";
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -19,9 +19,9 @@ public class TestAuthHandler(
             return Task.FromResult(AuthenticateResult.NoResult());   // ingen header = ikke logget ind
 
         var identity = new ClaimsIdentity(
-            [new Claim(JwtRegisteredClaimNames.Sub, userId.ToString())], Scheme);
+            [new Claim(JwtRegisteredClaimNames.Sub, userId.ToString())], SchemeName);
 
         return Task.FromResult(AuthenticateResult.Success(
-            new AuthenticationTicket(new ClaimsPrincipal(identity), Scheme)));
+            new AuthenticationTicket(new ClaimsPrincipal(identity), SchemeName)));
     }
 }
