@@ -1,28 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
-using System.Text;
 using BookMyHome.Persistence;
-using BookMyHome.Shared.UseCaseDtos;
-using BookMyHome.Shared.UseCaseDtos.Accommodations;
 
 namespace BookMyHome.Api.IntegrationTests
 {
-    public class AccommodationApiTests(BookMyHomeApiFactory factory)  : IClassFixture<BookMyHomeApiFactory>
+    public class AccommodationApiTests(BookMyHomeApiFactory factory) : IClassFixture<BookMyHomeApiFactory>
     {
-        private readonly HttpClient _client = factory.CreateClient();
-        private static DateOnly Days(int n) => DateOnly.FromDateTime(DateTime.Today.AddDays(n));
+        private readonly BookMyHomeApiFactory _factory = factory;
+        private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
-        private static CreateAccommodationRequest NewAccommodation(Guid hostId) => new(
-            hostId, "Testvej", "9", "Vejle", "7100", "Denmark", Days(1), Days(365), 250m);
+        private const string Url = "api/accommodations";
 
-        private static CreateAccommodationRequest New0PricePerDayAccommodation(Guid hostId) => new(
-           hostId, "Testvej", "9", "Vejle", "7100", "Denmark", Days(1), Days(365), 0m);
+        private HttpClient Host => _factory.CreateClientAs(DbSeeder.Host1Id);
+        private HttpClient Guest => _factory.CreateClientAs(DbSeeder.Guest1Id);
+        private HttpClient Anonymous => _factory.CreateClient();
 
-        private async Task<Guid> CreateAccommodationAsync(Guid hostId)
+        private async Task<Guid> CreateAccommodationAsHostAsync()
         {
-            var response = await _client.PostAsJsonAsync("api/accommodations", NewAccommodation(hostId));
+            var response = await Host.PostAsJsonAsync(Url, TestsData.Accommodation(), Ct);
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
             return Guid.Parse(response.Headers.Location!.Segments.Last());
         }
@@ -30,60 +25,81 @@ namespace BookMyHome.Api.IntegrationTests
         [Fact]
         public async Task Create_AllIsOk_Returns201()
         {
-            var response = await _client.PostAsJsonAsync("api/accommodations", NewAccommodation(DbSeeder.Host1Id));
+            var response = await Host.PostAsJsonAsync(Url, TestsData.Accommodation(), Ct);
 
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         }
 
         [Fact]
+        public async Task Create_NotLoggedIn_Returns401()
+        {
+            var response = await Anonymous.PostAsJsonAsync(Url, TestsData.Accommodation(), Ct);
+
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        }
+
+        [Fact]
         public async Task Create_ByUserWhoIsNotHost_Returns403()
         {
-            var response = await _client.PostAsJsonAsync("api/accommodations", NewAccommodation(DbSeeder.Guest1Id));
+            var response = await Guest.PostAsJsonAsync(Url, TestsData.Accommodation(), Ct);
 
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
+        // Gyldig token, men brugeren findes ikke i db
         [Fact]
         public async Task Create_UserDoesntExist_Returns404()
         {
-            var response = await _client.PostAsJsonAsync("api/accommodations", NewAccommodation(Guid.NewGuid()));
+            var unknownUser = _factory.CreateClientAs(Guid.NewGuid());
+
+            var response = await unknownUser.PostAsJsonAsync(Url, TestsData.Accommodation(), Ct);
 
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-
         [Fact]
         public async Task Create_PricePerDayIs0_Returns400()
         {
-            var response = await _client.PostAsJsonAsync("api/accommodations", New0PricePerDayAccommodation(DbSeeder.Host1Id));
+            var response = await Host.PostAsJsonAsync(Url, TestsData.Accommodation(pricePerDay: 0m), Ct);
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-
-
         [Fact]
         public async Task Delete_WithUpcomingBooking_Returns409()
         {
-            var id = await CreateAccommodationAsync(DbSeeder.Host1Id);
-            var booking = new CreateBookingRequest(DbSeeder.Guest1Id, Days(10), Days(15));
-            (await _client.PostAsJsonAsync($"api/accommodations/{id}/bookings", booking)).EnsureSuccessStatusCode();
+            // Arrange
+            var id = await CreateAccommodationAsHostAsync();
+            (await Guest.PostAsJsonAsync($"{Url}/{id}/bookings", TestsData.Booking(), Ct)).EnsureSuccessStatusCode();
 
-            var response = await _client.DeleteAsync($"api/accommodations/{id}/?userId={DbSeeder.Host1Id}");
+            // Act
+            var response = await Host.DeleteAsync($"{Url}/{id}", Ct);
 
+            // Assert
             Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         }
 
         [Fact]
         public async Task Delete_ThenGet_Returns404()
         {
-            var id = await CreateAccommodationAsync(DbSeeder.Host1Id);
+            var id = await CreateAccommodationAsHostAsync();
 
-            var delete = await _client.DeleteAsync($"api/accommodations/{id}?userId={DbSeeder.Host1Id}");
-            var get = await _client.GetAsync($"api/accommodations/{id}");
+            var delete = await Host.DeleteAsync($"{Url}/{id}", Ct);
+            var get = await Anonymous.GetAsync($"{Url}/{id}", Ct);   // GET er offentlig, så ingen login
 
             Assert.Equal(HttpStatusCode.NoContent, delete.StatusCode);
             Assert.Equal(HttpStatusCode.NotFound, get.StatusCode);
+        }
+
+        // IDOR - en anden bruger prøver at slette hostens bolig
+        [Fact]
+        public async Task Delete_SomeoneElsesAccommodation_Returns403()
+        {
+            var id = await CreateAccommodationAsHostAsync();
+
+            var response = await Guest.DeleteAsync($"{Url}/{id}", Ct);
+
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
     }
 }

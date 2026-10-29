@@ -14,7 +14,10 @@ namespace BookMyHome.Domain.Aggregates.Users
         public DateTimeOffset? HostAcceptedTermsAt { get; private set; }
         public bool IsHost => HostAcceptedTermsAt is not null;
 
+        #pragma warning disable CS8618
         private User() { }
+        #pragma warning restore CS8618
+
         public User(Guid id, FullName fullName, Email email, PhoneNumber phoneNumber, string username, string passwordHash)
         {
             if (id == Guid.Empty) throw new ArgumentException("Id cannot be empty;", nameof(id));

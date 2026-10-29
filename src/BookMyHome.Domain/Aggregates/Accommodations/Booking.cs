@@ -16,7 +16,10 @@ namespace BookMyHome.Domain.Aggregates.Accommodations
         public bool IsCompleted => Status == BookingStatus.Active && RentalPeriod.EndDate < DateOnly.FromDateTime(DateTime.Today); // The data decides if a booking is completed or not
         public decimal PricePerDayWhenBooked { get; private set; } // To store the historical data
 
+        #pragma warning disable CS8618
         private Booking() { }
+        #pragma warning restore CS8618
+
         internal Booking(Guid id, Guid guestId, Guid accommodationId, DateRange rentalPeriod, decimal pricePerDay, DateOnly today)
         {
             if (id == Guid.Empty)

@@ -17,9 +17,11 @@ namespace BookMyHome.Domain.Aggregates.Accommodations
         public bool IsDeleted => DeletedAt is not null;
 
         // Aggregate version for optimistic concurrency. Incremented by every method that changes the aggregate, including its bookings.
-        public int Version { get; private set; } 
+        public int Version { get; private set; }
 
+        #pragma warning disable CS8618 // To disable the annoying warning, from the compiler complaining that objects aren't materialized here. But they are. Just .. later.
         private Accommodation() { }
+        #pragma warning restore CS8618
 
         public Accommodation(Guid id, Guid hostId, Address address, DateRange availablePeriod, decimal pricePerDay)
         {
