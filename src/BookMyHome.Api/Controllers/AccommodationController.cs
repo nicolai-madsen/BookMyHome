@@ -1,11 +1,14 @@
-﻿using BookMyHome.Api.Mapping;
+﻿using BookMyHome.Api.Extensions;
+using BookMyHome.Api.Mapping;
 using BookMyHome.Application.Accommodations.CreateAccommodation;
 using BookMyHome.Application.Accommodations.DeleteAccommodation;
 using BookMyHome.Application.Accommodations.UpdateAccommodation;
+using BookMyHome.Domain.Aggregates.Accommodations;
 using BookMyHome.Domain.Exceptions;
 using BookMyHome.Domain.Interfaces.Repositories;
 using BookMyHome.Shared.DomainDtos;
 using BookMyHome.Shared.UseCaseDtos.Accommodations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookMyHome.Api.Controllers
@@ -14,10 +17,11 @@ namespace BookMyHome.Api.Controllers
     [Route("api/accommodations")]
     public class AccommodationsController(
         IAccommodationRepository repository,
-        ICreateAccommodationUseCase createAccommodation,
-        IUpdateAccommodationUseCase updateAccommodation,
-        IDeleteAccommodationUseCase deleteAccommodation) : ControllerBase
+        ICreateAccommodationUseCase _createAccommodation,
+        IUpdateAccommodationUseCase _updateAccommodation,
+        IDeleteAccommodationUseCase _deleteAccommodation) : ControllerBase
     {
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AccommodationDto>>> GetAll([FromQuery] Guid? hostId)
         {
@@ -28,6 +32,7 @@ namespace BookMyHome.Api.Controllers
             return Ok(accommodations.Select(a => a.ToDto()));
         }
 
+        [AllowAnonymous]
         [HttpGet("{id:guid}")]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<AccommodationDto>> GetById(Guid id)
@@ -46,12 +51,12 @@ namespace BookMyHome.Api.Controllers
         public async Task<IActionResult> Create(CreateAccommodationRequest request, CancellationToken ct)
         {
             var command = new CreateAccommodationUseCaseCommand(
-                request.HostId, request.StreetName, request.StreetNumber, request.City,
+                User.GetUserId(),                       // host = den indloggede
+                request.StreetName, request.StreetNumber, request.City,
                 request.ZipCode, request.Country, request.AvailableFrom, request.AvailableTo,
                 request.PricePerDay);
 
-            var id = await createAccommodation.ExecuteAsync(command, ct);
-
+            var id = await _createAccommodation.ExecuteAsync(command, ct);
             return CreatedAtAction(nameof(GetById), new { id }, null);
         }
 
@@ -64,11 +69,12 @@ namespace BookMyHome.Api.Controllers
         public async Task<IActionResult> Update(Guid id, UpdateAccommodationRequest request, CancellationToken ct)
         {
             var command = new UpdateAccommodationUseCaseCommand(
-                id, request.UserId, request.StreetName, request.StreetNumber, request.City,
+                id, User.GetUserId(),
+                request.StreetName, request.StreetNumber, request.City,
                 request.ZipCode, request.Country, request.AvailableFrom, request.AvailableTo,
                 request.PricePerDay);
 
-            await updateAccommodation.ExecuteAsync(command, ct);
+            await _updateAccommodation.ExecuteAsync(command, ct);
             return NoContent();
         }
 
@@ -78,9 +84,9 @@ namespace BookMyHome.Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public async Task<IActionResult> Delete(Guid id, [FromQuery] Guid userId, CancellationToken ct)
+        public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
-            await deleteAccommodation.ExecuteAsync(new DeleteAccommodationUseCaseCommand(id, userId), ct);
+            await _deleteAccommodation.ExecuteAsync(new DeleteAccommodationUseCaseCommand(id, User.GetUserId()), ct);
             return NoContent();
         }
     }

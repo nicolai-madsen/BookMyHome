@@ -1,7 +1,6 @@
 ﻿namespace BookMyHome.Shared.UseCaseDtos.Accommodations
 {
     public sealed record UpdateAccommodationRequest(
-        Guid UserId,   // HUSK!!! Opgave 11: fjernes, kommer fra JWT
         string StreetName,
         string StreetNumber,
         string City,

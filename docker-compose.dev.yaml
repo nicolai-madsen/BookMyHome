@@ -19,6 +19,7 @@ services:
         build: ./src/BookMyHome.AuthService
         environment: 
             ConnectionStrings__Default: "server=usersdb;user=root;password=root;database=usersdb"
+            Jwt__InternalBaseUrl: http://authservice:8080
             Jwt__Issuer: "BookMyHome.AuthService"
             Jwt__Audience: "BookMyHome"
             Jwt__ExpiryMinutes: "60"
@@ -44,6 +45,10 @@ services:
     bookmyhome-api:
         build: .
         image: bookmyhome-api-dev
+        environment: 
+            - Jwt__AuthBaseUrl=http://authservice:8080
+            - Jwt__Issuer=BookMyHome.AuthService
+            - Jwt__Audience=BookMyHome
         labels:
             com.centurylinklabs.watchtower.enable: "false"
 

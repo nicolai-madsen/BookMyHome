@@ -20,13 +20,14 @@ builder.Services.AddSingleton(sp =>
     var jwt = sp.GetRequiredService<IOptions<JwtOptions>>().Value;
 
     var rsa = RSA.Create();
- 
+
     rsa.ImportFromPem(File.ReadAllText(jwt.PrivateKeyPath));
 
-    // The key needs a KeyId to be set, otherwise the JWT token will not contain a "kid" header, which is required for clients to verify their tokens, if the key changes (key rotation).
-    var key = new RsaSecurityKey(rsa) { KeyId = jwt.KeyId };
-    return new SigningCredentials(key, SecurityAlgorithms.RsaSha256);
+    return new RsaSecurityKey(rsa) { KeyId = jwt.KeyId };
 });
+
+builder.Services.AddSingleton(sp =>
+    new SigningCredentials(sp.GetRequiredService<RsaSecurityKey>(), SecurityAlgorithms.RsaSha256));
 
 var app = builder.Build();
 
@@ -86,6 +87,24 @@ app.MapPost("/login", async (UserLogin input, TokenService tokens) =>
         return Results.Unauthorized();
 
     return Results.Ok(new { token = tokens.CreateToken(id, input.Username) });
+});
+
+app.MapGet("/.well-known/openid-configuration", (IConfiguration cfg) => new
+{
+    issuer = cfg["Jwt:Issuer"],
+    jwks_uri = $"{cfg["Jwt:InternalBaseUrl"]}/.well-known/jwks.json"
+});
+
+app.MapGet("/.well-known/jwks.json", (RsaSecurityKey key) =>
+{
+    var jwk = JsonWebKeyConverter.ConvertFromRSASecurityKey(key);
+    return new
+    {
+        keys = new[]
+        {
+            new { kty = jwk.Kty, use = "sig", alg = "RS256", kid = jwk.Kid, n = jwk.N, e = jwk.E }
+        }
+    };
 });
 
 app.Run();
