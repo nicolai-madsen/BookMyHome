@@ -1,7 +1,8 @@
 ﻿using BookMyHome.Api.Extensions;
 using BookMyHome.Api.Mapping;
-using BookMyHome.Application.Accommodations.CreateBooking;
-using BookMyHome.Application.Accommodations.RescheduleBooking;
+using BookMyHome.Application.Accommodations.Bookings.CancelBooking;
+using BookMyHome.Application.Accommodations.Bookings.CreateBooking;
+using BookMyHome.Application.Accommodations.Bookings.RescheduleBooking;
 using BookMyHome.Domain.Aggregates.Accommodations;
 using BookMyHome.Domain.Exceptions;
 using BookMyHome.Domain.Interfaces;
@@ -9,6 +10,7 @@ using BookMyHome.Domain.Interfaces.Repositories;
 using BookMyHome.Shared.DomainDtos;
 using BookMyHome.Shared.UseCaseDtos.Accommodations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BookMyHome.Api.Controllers
 {
@@ -17,9 +19,8 @@ namespace BookMyHome.Api.Controllers
     public class BookingsController(
         ICreateBookingUseCase createBooking,
         IRescheduleBookingUseCase rescheduleBooking,
-        IAccommodationRepository repository,
-        IUnitOfWork unitOfWork,
-        TimeProvider time) : ControllerBase
+        ICancelBookingUseCase cancelBookingUseCase,
+        IAccommodationRepository repository) : ControllerBase
         
     {
         [HttpGet]
@@ -86,9 +87,12 @@ namespace BookMyHome.Api.Controllers
         [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<IActionResult> Cancel(Guid accommodationId, Guid bookingId, CancellationToken ct)
         {
-            var accommodation = await LoadAsync(accommodationId);
-            accommodation.CancelBooking(bookingId, User.GetUserId());   // tilpas til din domænesignatur
-            await unitOfWork.SaveChangesAsync(ct);
+            await cancelBookingUseCase.ExecuteAsync(new CancelBookingUseCaseCommand(
+                AccommodationId: accommodationId,
+                BookingId: bookingId,
+                UserId: User.GetUserId()), 
+                ct);
+
             return NoContent();
         }
 

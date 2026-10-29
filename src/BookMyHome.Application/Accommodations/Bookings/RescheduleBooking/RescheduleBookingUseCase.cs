@@ -3,7 +3,7 @@ using BookMyHome.Domain.Interfaces;
 using BookMyHome.Domain.Interfaces.Repositories;
 using BookMyHome.Domain.ValueObjects;
 
-namespace BookMyHome.Application.Accommodations.RescheduleBooking
+namespace BookMyHome.Application.Accommodations.Bookings.RescheduleBooking
 {
     public sealed class RescheduleBookingUseCase : IRescheduleBookingUseCase 
     {

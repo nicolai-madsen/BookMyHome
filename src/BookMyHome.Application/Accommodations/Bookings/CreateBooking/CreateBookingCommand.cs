@@ -1,4 +1,4 @@
-﻿namespace BookMyHome.Application.Accommodations.CreateBooking
+﻿namespace BookMyHome.Application.Accommodations.Bookings.CreateBooking
 {
     public sealed record CreateBookingCommand(
         Guid GuestId,

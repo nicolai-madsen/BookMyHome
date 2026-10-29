@@ -40,6 +40,9 @@ namespace BookMyHome.Domain.Aggregates.Accommodations
             PricePerDay = pricePerDay;
         }
 
+        public Booking GetBooking(Guid bookingId) => _bookings.FirstOrDefault(b => b.Id == bookingId) 
+            ?? throw new BookingNotFoundException(bookingId);
+
         public Booking CreateBooking(Guid guestId, DateRange period, DateOnly today)
         {
           

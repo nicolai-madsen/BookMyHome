@@ -3,7 +3,7 @@ using BookMyHome.Domain.Interfaces;
 using BookMyHome.Domain.Interfaces.Repositories;
 using BookMyHome.Domain.ValueObjects;
 
-namespace BookMyHome.Application.Accommodations.CreateBooking
+namespace BookMyHome.Application.Accommodations.Bookings.CreateBooking
 {
     public class CreateBookingUseCase : ICreateBookingUseCase
     {

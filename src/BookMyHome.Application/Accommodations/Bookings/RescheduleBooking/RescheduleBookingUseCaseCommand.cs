@@ -1,4 +1,4 @@
-﻿namespace BookMyHome.Application.Accommodations.RescheduleBooking
+﻿namespace BookMyHome.Application.Accommodations.Bookings.RescheduleBooking
 {
     public sealed record RescheduleBookingUseCaseCommand(
         Guid AccommodationId,
